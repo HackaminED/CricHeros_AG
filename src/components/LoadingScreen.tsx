@@ -1,195 +1,254 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface LoadingScreenProps {
   onComplete: () => void;
 }
 
+/*
+ * Hybrid Loading Screen
+ * ─────────────────────
+ * Phase 1 (video):       Play real Virat Kohli footage — cinematic bat-ball impact.
+ * Phase 2 (ball-flight): The video fades with a bright flash. A CSS-animated cricket
+ *                         ball "continues" flying from where the real ball left off,
+ *                         spinning and growing as it approaches the camera.
+ * Phase 3 (logo):        The ball decelerates and shrinks into position as the "O"
+ *                         inside the word "IMPACT HEROS". Text slides in around it.
+ * Phase 4 (done):        Fade out to dashboard.
+ */
+
 export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
-  // Cinematic sequence phases
-  // 'intro': Close up zoom on batsman
-  // 'impact': Flash and camera shake
-  // 'ball-flight': Ball launches from batsman towards screen
-  // 'logo-snap': Ball lands in the exact spot of the "O"
-  // 'done': Animation finished
-  const [phase, setPhase] = useState<'intro' | 'impact' | 'ball-flight' | 'logo-snap' | 'done'>('intro');
+  const [phase, setPhase] = useState<
+    "video" | "ball-flight" | "logo" | "done"
+  >("video");
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    // Timing matches a classic movie trailer beat
-    const impactTimer = setTimeout(() => setPhase('impact'), 1800); 
-    const flightTimer = setTimeout(() => setPhase('ball-flight'), 2100); 
-    const snapTimer = setTimeout(() => setPhase('logo-snap'), 3200);
-
-    const completeTimer = setTimeout(() => {
-      setPhase('done');
-      setTimeout(onComplete, 800);
-    }, 5500);
+    const t1 = setTimeout(() => setPhase("ball-flight"), 2500);
+    const t2 = setTimeout(() => setPhase("logo"), 4500);
+    const t3 = setTimeout(() => {
+      setPhase("done");
+      setTimeout(onComplete, 600);
+    }, 6200);
 
     return () => {
-      clearTimeout(impactTimer);
-      clearTimeout(flightTimer);
-      clearTimeout(snapTimer);
-      clearTimeout(completeTimer);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
     };
   }, [onComplete]);
 
+  // Ball visual component (shared between flight and logo)
+  const BallVisual = ({ isLogo }: { isLogo: boolean }) => (
+    <div
+      className={`relative flex items-center justify-center rounded-full transition-all duration-700 ${
+        isLogo
+          ? "w-[0.75em] h-[0.75em] border-[4px] md:border-[6px] border-emerald-500 bg-transparent shadow-[0_0_30px_rgba(16,185,129,0.3)]"
+          : "w-[0.75em] h-[0.75em] bg-gradient-to-br from-red-700 via-red-800 to-red-950 shadow-[inset_-4px_-4px_12px_rgba(0,0,0,0.6),0_0_25px_rgba(200,0,0,0.25)]"
+      }`}
+    >
+      {/* Primary seam */}
+      <div
+        className={`absolute w-[85%] h-[2.5px] rounded-full transition-colors duration-700 ${
+          isLogo ? "bg-emerald-500/40" : "bg-yellow-100/60"
+        }`}
+        style={{ transform: "rotate(-25deg)" }}
+      />
+      {/* Cross seam */}
+      <div
+        className={`absolute w-[2.5px] h-[85%] rounded-full transition-colors duration-700 ${
+          isLogo ? "bg-emerald-500/25" : "bg-yellow-100/40"
+        }`}
+        style={{ transform: "rotate(-25deg)" }}
+      />
+      {/* Shine highlight (ball only) */}
+      {!isLogo && (
+        <div className="absolute top-[15%] right-[20%] w-[20%] h-[20%] bg-white/15 rounded-full blur-[2px]" />
+      )}
+    </div>
+  );
+
   return (
     <AnimatePresence>
-      {phase !== 'done' && (
-        <motion.div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black overflow-hidden font-sans"
-          exit={{ opacity: 0, scale: 1.05 }}
-          transition={{ duration: 0.8, ease: "easeInOut" }}
+      {phase !== "done" && (
+        <motion.div
+          className="fixed inset-0 z-50 bg-black overflow-hidden"
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.6, ease: "easeInOut" }}
         >
-          {/* Background overlay (Darkens as logo approaches) */}
-          <motion.div 
-            className="absolute inset-0 z-0 bg-[#0a0a0a]"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: phase === 'logo-snap' ? 1 : 0 }}
-            transition={{ duration: 0.5 }}
-          />
+          {/* ── LAYER 1: Real Video ── */}
+          <motion.div
+            className="absolute inset-0 z-10"
+            animate={{
+              opacity: phase === "video" ? 1 : 0,
+              scale: phase === "video" ? 1 : 1.1,
+              filter:
+                phase === "video"
+                  ? "brightness(0.85) blur(0px)"
+                  : "brightness(3) blur(15px)",
+            }}
+            transition={{
+              duration: phase === "video" ? 0 : 0.4,
+              ease: "easeOut",
+            }}
+          >
+            <video
+              ref={videoRef}
+              src="/cinematic_swing.mp4"
+              autoPlay
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+            />
+            {/* Cinematic vignette */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  "radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,0.75) 100%)",
+              }}
+            />
+          </motion.div>
 
-          {/* Phase 1 & 2: The Batsman & Impact (2.5D Parallax) */}
+          {/* ── LAYER 2: Ball Flight (ONLY during flight phase) ── */}
           <AnimatePresence>
-            {(phase === 'intro' || phase === 'impact') && (
-              <motion.div 
-                className="absolute inset-0 w-full h-full z-10"
-                initial={{ filter: "brightness(0.5)" }}
-                animate={{ filter: phase === 'impact' ? "brightness(2) contrast(1.5)" : "brightness(0.9) contrast(1.1)" }}
-                exit={{ opacity: 0, scale: 1.2, filter: "brightness(3) blur(10px)" }} 
-                transition={{ duration: phase === 'impact' ? 0.1 : 3, ease: "easeOut" }}
-              >
-                {/* Micro zoom push */}
+            {phase === "ball-flight" && (
+              <motion.div className="absolute inset-0 z-20 flex items-center justify-center">
+                {/* Dark bg fade in */}
                 <motion.div
-                  className="relative w-full h-full"
-                  initial={{ scale: 1.05, x: 0, y: 0 }}
-                  animate={{ 
-                    scale: phase === 'impact' ? 1.15 : 1.12,
-                    x: phase === 'impact' ? [0, -10, 10, -5, 5, 0] : 0, // Camera shake on impact
-                    y: phase === 'impact' ? [0, 10, -10, 5, -5, 0] : 0
-                  }}
-                  transition={{ 
-                    scale: { duration: phase === 'impact' ? 0.2 : 2.5, ease: "easeIn" },
-                    x: { duration: 0.3 },
-                    y: { duration: 0.3 }
-                  }}
-                >
-                  <Image 
-                    src="/cinematic-batsman.png" 
-                    alt="Cinematic Batsman"
-                    fill
-                    priority
-                    className="object-cover object-center"
-                  />
-                  
-                  {/* Dust particles simulated with small divs during impact */}
-                  {phase === 'impact' && (
-                    <div className="absolute inset-0 flex justify-center items-center">
-                       {Array.from({ length: 20 }).map((_, i) => (
-                         <motion.div
-                           key={i}
-                           className="absolute w-2 h-2 bg-yellow-100 rounded-full blur-[1px]"
-                           initial={{ x: 0, y: 0, opacity: 1, scale: 0 }}
-                           animate={{ 
-                             x: (Math.random() - 0.5) * 500, 
-                             y: (Math.random() - 0.5) * 500,
-                             opacity: 0,
-                             scale: Math.random() * 3
-                           }}
-                           transition={{ duration: 0.8, ease: "easeOut" }}
-                         />
-                       ))}
-                    </div>
-                  )}
-                  
-                </motion.div>
-                
-                {/* Cinematic Vignette */}
-                <div className="absolute inset-0 bg-radial-gradient from-transparent to-black opacity-80 pointer-events-none" style={{ background: 'radial-gradient(circle, transparent 20%, #000 90%)'}} />
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  className="absolute inset-0 bg-[#0a0a0a]"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 0.9 }}
+                  transition={{ duration: 1.2 }}
+                />
 
-          {/* Phase 3: The Ball Flight (3D perspective scaling) */}
-          <AnimatePresence>
-            {(phase === 'ball-flight' || phase === 'logo-snap') && (
-              <motion.div 
-                className="absolute inset-0 flex items-center justify-center z-20"
-              >
-                {/* The Cricket Ball */}
+                {/* Flying ball */}
                 <motion.div
-                  className="relative z-30"
-                  initial={{ scale: 0, z: -1000, y: 200, x: -100, rotate: 0, filter: "blur(10px)", opacity: 0 }}
-                  animate={phase === 'logo-snap' ? {
-                    scale: 1, // End at logo scale
-                    z: 0,
-                    y: 0,
+                  className="relative z-30 text-[80px] md:text-[120px]"
+                  initial={{
+                    x: 250,
+                    y: -200,
+                    scale: 0.4,
+                    rotate: 0,
+                    opacity: 0,
+                  }}
+                  animate={{
                     x: 0,
-                    rotate: 1080, // Heavy spin
-                    filter: "blur(0px)",
-                    opacity: 1
-                  } : {
-                    scale: 15, // Giant in middle of flight
-                    z: 500,
-                    y: -50,
-                    x: 50,
-                    rotate: 540,
-                    filter: "blur(4px)",
-                    opacity: 1
+                    y: 20,
+                    scale: 4,
+                    rotate: 900,
+                    opacity: 1,
                   }}
-                  transition={phase === 'logo-snap' ? {
-                    duration: 0.6, type: "spring", damping: 15, stiffness: 100
-                  } : {
-                    duration: 1.1, ease: "circIn"
+                  exit={{
+                    scale: 0,
+                    opacity: 0,
+                    transition: { duration: 0.2 },
+                  }}
+                  transition={{
+                    duration: 2,
+                    ease: [0.22, 0.68, 0.36, 1],
                   }}
                 >
-                  {/* Visual construction of the ball/logo O */}
-                  <div className={`flex items-center justify-center w-[0.8em] h-[0.8em] rounded-full text-7xl md:text-8xl transition-all duration-300 ${phase === 'logo-snap' ? 'border-[10px] border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.3)] bg-transparent' : 'bg-red-700 shadow-[inset_-10px_-10px_20px_rgba(0,0,0,0.5),0_0_50px_rgba(255,0,0,0.5)]'}`}>
-                    {/* Seam transforms into logo line */}
-                    <motion.div 
-                      className={`absolute w-full h-[5%] rounded-full transition-colors duration-500 ${phase === 'logo-snap' ? 'bg-emerald-500/50' : 'bg-white/80'}`}
-                    />
-                  </div>
+                  <BallVisual isLogo={false} />
                 </motion.div>
+
+                {/* Trailing particles */}
+                <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden">
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="absolute w-1 h-1 bg-amber-400/50 rounded-full"
+                      style={{
+                        top: `${30 + Math.random() * 40}%`,
+                        left: `${45 + Math.random() * 15}%`,
+                      }}
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{
+                        opacity: [0, 0.7, 0],
+                        scale: [0, 2, 0],
+                        x: (Math.random() - 0.5) * 400,
+                        y: (Math.random() - 0.5) * 400,
+                      }}
+                      transition={{
+                        duration: 1.2 + Math.random(),
+                        delay: i * 0.12,
+                        ease: "easeOut",
+                      }}
+                    />
+                  ))}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Phase 4: Logo Text Reveal (Ball is already in position 'O' from phase 3) */}
+          {/* ── LAYER 3: Logo Phase (ball is INSIDE the text flow) ── */}
           <AnimatePresence>
-            {phase === 'logo-snap' && (
+            {phase === "logo" && (
               <motion.div
-                className="flex flex-col items-center justify-center absolute z-20 w-full h-full"
+                className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#0a0a0a]"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.25 }}
               >
-                <div className="flex items-center text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-white">
+                <div className="flex items-center text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-white leading-none">
+                  {/* "IMPACT HER" */}
                   <motion.span
-                    initial={{ opacity: 0, x: -50 }}
-                    animate={{ opacity: 1, x: 0 }}
+                    initial={{ opacity: 0, x: -40, filter: "blur(8px)" }}
+                    animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
                     transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
                   >
-                    IMPACT HER
+                    IMPACT&nbsp;HER
                   </motion.span>
-                  
-                  {/* Invisible spacer for the "O" (The actual animating ball sits exactly here via absolute positioning relative to center, but we use a spacer here to push 'S' correctly) */}
-                  <div className="w-[0.8em] h-[0.8em] mx-1 md:mx-2 opacity-0"></div>
 
+                  {/* The Ball as the "O" — lives INSIDE the text flex */}
+                  <motion.div
+                    className="inline-flex items-center justify-center mx-[0.02em]"
+                    initial={{ scale: 5, rotate: 720, opacity: 0, filter: "blur(6px)" }}
+                    animate={{ scale: 1, rotate: 0, opacity: 1, filter: "blur(0px)" }}
+                    transition={{
+                      type: "spring",
+                      damping: 20,
+                      stiffness: 150,
+                      delay: 0.05,
+                    }}
+                  >
+                    <BallVisual isLogo={true} />
+                  </motion.div>
+
+                  {/* "S" */}
                   <motion.span
-                    initial={{ opacity: 0, x: 50 }}
-                    animate={{ opacity: 1, x: 0 }}
+                    initial={{ opacity: 0, x: 40, filter: "blur(8px)" }}
+                    animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
                     transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
                   >
                     S
                   </motion.span>
                 </div>
-                
+
+                {/* Emerald accent line */}
                 <motion.div
-                  className="mt-6 h-1 bg-emerald-500 rounded-full"
+                  className="mt-5 h-[3px] bg-emerald-500 rounded-full"
                   initial={{ width: 0, opacity: 0 }}
-                  animate={{ width: "200px", opacity: 1 }}
-                  transition={{ duration: 0.8, delay: 0.4, ease: "circOut" }}
+                  animate={{ width: 160, opacity: 1 }}
+                  transition={{
+                    duration: 0.7,
+                    delay: 0.35,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                />
+
+                {/* Subtle cinematic light sweep */}
+                <motion.div
+                  className="absolute inset-0 pointer-events-none"
+                  initial={{ x: "-100%" }}
+                  animate={{ x: "200%" }}
+                  transition={{ duration: 1.5, delay: 0.5, ease: "easeInOut" }}
+                  style={{
+                    background:
+                      "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.04) 48%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 52%, transparent 65%)",
+                  }}
                 />
               </motion.div>
             )}
