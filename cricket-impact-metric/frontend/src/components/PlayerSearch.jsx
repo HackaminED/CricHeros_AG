@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getPlayers } from '../api/api';
+import { useGender } from '../context/GenderContext';
 
 export default function PlayerSearch({ onSelect }) {
+    const { gender } = useGender();
     const [query, setQuery] = useState('');
     const [results, setResults] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
@@ -32,7 +34,7 @@ export default function PlayerSearch({ onSelect }) {
         debounceTimer.current = setTimeout(async () => {
             setLoading(true);
             try {
-                const data = await getPlayers(query, 8);
+                const data = await getPlayers(query, 8, gender);
                 setResults(data.players || []);
                 setIsOpen(true);
                 setSelectedIndex(-1);
@@ -45,7 +47,7 @@ export default function PlayerSearch({ onSelect }) {
         }, 300);
 
         return () => clearTimeout(debounceTimer.current);
-    }, [query]);
+    }, [query, gender]);
 
     const handleKeyDown = (e) => {
         if (!isOpen || results.length === 0) return;
@@ -71,7 +73,8 @@ export default function PlayerSearch({ onSelect }) {
     };
 
     const getScoreColor = (score) => {
-        if (score >= 75) return 'text-indigo-400';
+        const baseColor = gender === 'Women' ? 'text-fuchsia-400' : 'text-indigo-400';
+        if (score >= 75) return baseColor;
         if (score >= 60) return 'text-emerald-400';
         if (score >= 40) return 'text-amber-400';
         return 'text-red-400';
@@ -110,9 +113,10 @@ export default function PlayerSearch({ onSelect }) {
                             key={player.player}
                             onClick={() => handleSelect(player)}
                             className={`w-full px-4 py-3 flex items-center justify-between text-left
-                hover:bg-indigo-500/10 transition-colors duration-150
-                ${idx === selectedIndex ? 'bg-indigo-500/15' : ''}
-                ${idx > 0 ? 'border-t border-gray-700/30' : ''}`}
+                                transition-colors duration-150
+                                ${idx === selectedIndex ? (gender === 'Women' ? 'bg-fuchsia-500/15' : 'bg-indigo-500/15') : ''}
+                                ${gender === 'Women' ? 'hover:bg-fuchsia-500/10' : 'hover:bg-indigo-500/10'}
+                                ${idx > 0 ? 'border-t border-gray-700/30' : ''}`}
                         >
                             <div>
                                 <p className="text-sm font-medium text-gray-200">{player.player}</p>

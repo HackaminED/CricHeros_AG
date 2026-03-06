@@ -4,55 +4,50 @@ matches.py — Match-related API routes.
 
 from fastapi import APIRouter, HTTPException, Query
 from backend.database.db import query_all
+from backend.services.impact_engine import get_match_impact_data, ALLOWED_TEAMS
 
 router = APIRouter(prefix="/matches", tags=["matches"])
 
 
 @router.get("/{match_id}")
 def get_match(match_id: str):
-    """Get match details with per-player impact breakdown."""
-    rows = query_all(
-        """
-        SELECT player, team, batting_impact, bowling_impact,
-               match_impact, impact_score, runs_scored, balls_faced,
-               wickets_taken, balls_bowled, runs_conceded, start_date
-        FROM player_match_impacts
-        WHERE match_id = ?
-        ORDER BY match_impact DESC
-        """,
-        (match_id,),
-    )
-
-    if not rows:
+    """Get match details with per-player 3-layer impact breakdown."""
+    data = get_match_impact_data(match_id)
+    if not data:
         raise HTTPException(status_code=404, detail=f"Match '{match_id}' not found")
-
-    teams = {}
-    for row in rows:
-        team = row["team"]
-        if team not in teams:
-            teams[team] = []
-        teams[team].append(row)
-
-    return {
-        "match_id": match_id,
-        "date": rows[0]["start_date"] if rows else None,
-        "teams": teams,
-        "players": rows,
-    }
+    return data
 
 
 @router.get("")
-def list_matches(limit: int = Query(50, ge=1, le=500)):
-    """List recent matches."""
-    rows = query_all(
-        """
+def list_matches(
+    team: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
+    gender: str = "Men"
+):
+    """
+    List unique matches (teams and dates).
+    Only returns matches where BOTH teams are in ALLOWED_TEAMS.
+    Strictly isolates matches by gender format.
+    """
+    placeholders = ",".join("?" for _ in ALLOWED_TEAMS)
+    
+    query = f"""
         SELECT DISTINCT match_id, start_date, team
         FROM player_match_impacts
-        ORDER BY start_date DESC
-        """,
-    )
+        WHERE team IN ({placeholders}) AND gender = ?
+    """
+    params = [*ALLOWED_TEAMS, gender]
+    
+    if team:
+        query += " AND team = ?"
+        params.append(team)
 
-    # Group by match
+    query += " ORDER BY start_date DESC"
+    
+    rows = query_all(query, tuple(params))
+
+    # Group by match — only include matches where BOTH teams are in allowed list
     matches = {}
     for row in rows:
         mid = row["match_id"]
@@ -61,6 +56,11 @@ def list_matches(limit: int = Query(50, ge=1, le=500)):
         if row["team"] not in matches[mid]["teams"]:
             matches[mid]["teams"].append(row["team"])
 
-    match_list = sorted(matches.values(), key=lambda x: x["date"] or "", reverse=True)[:limit]
+    # Filter: keep only matches with at least 2 allowed teams
+    filtered = [
+        m for m in matches.values()
+        if len(m["teams"]) >= 2
+    ]
 
+    match_list = sorted(filtered, key=lambda x: x["date"] or "", reverse=True)[:limit]
     return {"matches": match_list, "count": len(match_list)}

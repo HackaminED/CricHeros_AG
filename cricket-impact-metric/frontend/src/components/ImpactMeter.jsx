@@ -1,81 +1,102 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const getScoreColor = (score) => {
-    if (score >= 75) return { stroke: '#818cf8', glow: 'rgba(129, 140, 248, 0.4)', label: 'ELITE' };
-    if (score >= 60) return { stroke: '#10b981', glow: 'rgba(16, 185, 129, 0.4)', label: 'HIGH' };
-    if (score >= 40) return { stroke: '#f59e0b', glow: 'rgba(245, 158, 11, 0.4)', label: 'AVERAGE' };
-    return { stroke: '#ef4444', glow: 'rgba(239, 68, 68, 0.4)', label: 'LOW' };
+const getColor = (s, theme) => {
+    // We can use the theme parameter here to override emerald/amber/rose if we want
+    // But aligning with friend's design:
+    if (s < 40) return "#f43f5e"; // Rose 500
+    if (s < 60) return "#f59e0b"; // Amber 500
+    // If the gender is set, we use the active theme instead of standard emerald.
+    return theme === 'fuchsia' ? '#d946ef' : '#6366f1'; 
 };
 
-export default function ImpactMeter({ score = 0, size = 200, label = 'Impact Score' }) {
+export default function ImpactMeter({ score = 0, size = 180, label = 'Impact Score', onInfoClick, theme = 'indigo' }) {
     const [animatedScore, setAnimatedScore] = useState(0);
-    const circumference = 2 * Math.PI * 45; // r = 45
-    const { stroke, glow, label: tier } = getScoreColor(score);
+
+    const normalizedScore = Math.min(100, Math.max(0, score));
+
+    // Circumference of half circle = pi * r
+    const r = 40;
+    const circum = Math.PI * r;
+    const offset = circum - (animatedScore / 100) * circum;
+
+    const color = getColor(animatedScore, theme);
 
     useEffect(() => {
         const duration = 1500;
         const start = performance.now();
         const from = 0;
-        const to = score;
+        const to = normalizedScore;
 
         const animate = (now) => {
             const elapsed = now - start;
             const progress = Math.min(elapsed / duration, 1);
-            // ease-out cubic
             const eased = 1 - Math.pow(1 - progress, 3);
             setAnimatedScore(Math.round(from + (to - from) * eased));
             if (progress < 1) requestAnimationFrame(animate);
         };
         requestAnimationFrame(animate);
-    }, [score]);
-
-    const offset = circumference - (animatedScore / 100) * circumference;
+    }, [normalizedScore]);
 
     return (
-        <div className="flex flex-col items-center gap-3">
-            <div className="relative" style={{ width: size, height: size }}>
-                <svg
-                    viewBox="0 0 100 100"
-                    className="transform -rotate-90"
-                    style={{ width: size, height: size }}
+        <div className="relative flex flex-col items-center justify-center p-6 bg-gray-900/50 rounded-[2rem] border border-gray-800 backdrop-blur-md shadow-xl">
+            {onInfoClick && (
+                <button
+                    onClick={onInfoClick}
+                    className={`absolute top-4 right-4 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all shadow-lg
+                        ${theme === 'fuchsia' 
+                            ? 'bg-fuchsia-500/20 border border-fuchsia-500/30 text-fuchsia-400 hover:bg-fuchsia-500/40 hover:text-white shadow-fuchsia-500/10' 
+                            : 'bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/40 hover:text-white shadow-indigo-500/10'}`}
+                    title="How is this calculated?"
                 >
-                    {/* Background circle */}
-                    <circle
-                        cx="50" cy="50" r="45"
+                    ℹ
+                </button>
+            )}
+
+            <h3 className="text-gray-400 font-medium tracking-wide text-xs uppercase mb-4">
+                {label}
+            </h3>
+
+            <div className="relative flex items-end justify-center overflow-hidden" style={{ width: size, height: size / 2 }}>
+                {/* Background Arc */}
+                <svg className="absolute top-0 w-full" style={{ height: size }} viewBox="0 0 100 100">
+                    <path
+                        d="M 10 50 A 40 40 0 0 1 90 50"
                         fill="none"
-                        stroke="#1e1e2e"
+                        stroke="#1f2937"
                         strokeWidth="8"
-                    />
-                    {/* Glow effect */}
-                    <circle
-                        cx="50" cy="50" r="45"
-                        fill="none"
-                        stroke={stroke}
-                        strokeWidth="8"
-                        strokeDasharray={circumference}
-                        strokeDashoffset={offset}
                         strokeLinecap="round"
+                    />
+                    {/* Foreground Arc */}
+                    <path
+                        d="M 10 50 A 40 40 0 0 1 90 50"
+                        fill="none"
+                        stroke={color}
+                        strokeWidth="8"
+                        strokeLinecap="round"
+                        strokeDasharray={circum}
+                        strokeDashoffset={offset}
                         style={{
-                            filter: `drop-shadow(0 0 8px ${glow})`,
-                            transition: 'stroke-dashoffset 0.1s linear',
+                            filter: `drop-shadow(0 0 8px ${color}80)`,
+                            transition: 'stroke-dashoffset 0.1s linear, stroke 0.3s ease',
                         }}
                     />
                 </svg>
-                {/* Center text */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span
-                        className="font-mono font-bold tracking-wider"
-                        style={{ fontSize: size * 0.22, color: stroke }}
-                    >
-                        {animatedScore}
-                    </span>
-                    <span className="text-xs font-semibold tracking-widest opacity-60 mt-1"
-                        style={{ color: stroke }}>
-                        {tier}
-                    </span>
+
+                {/* Score Display */}
+                <div
+                    className="absolute font-black tabular-nums tracking-tighter"
+                    style={{ color: color, fontSize: size * 0.25, bottom: -size * 0.05 }}
+                >
+                    {animatedScore}
                 </div>
             </div>
-            <span className="text-sm text-gray-400 font-medium">{label}</span>
+
+            {/* Legend / Baseline markers */}
+            <div className="flex justify-between w-full mt-4 max-w-[12rem] text-[10px] font-semibold text-gray-500">
+                <span>0</span>
+                <span className="text-gray-400">50</span>
+                <span>100</span>
+            </div>
         </div>
     );
 }

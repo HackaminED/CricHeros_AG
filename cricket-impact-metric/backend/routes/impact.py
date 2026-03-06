@@ -4,64 +4,60 @@ impact.py — Leaderboard and impact-related routes.
 
 from fastapi import APIRouter, Query
 from backend.database.db import query_all
+from backend.services.impact_engine import (
+    get_leaderboard_data, ALLOWED_TEAMS, MIN_INNINGS_LEADERBOARD,
+)
 
 router = APIRouter(tags=["impact"])
 
 
 @router.get("/leaderboard")
 def get_leaderboard(
+    min_innings: int = Query(10, ge=1, le=50, description="Minimum innings to qualify"),
+    teams: str | None = Query(None, description="Comma-separated list of allowed teams"),
+    role: str | None = Query(None, description="'batter' or 'bowler'"),
     limit: int = Query(50, ge=1, le=200),
-    role: str = Query(None, description="Filter by role: batter, bowler, allrounder"),
+    gender: str = "Men"
 ):
-    """Get top players by impact score."""
-    if role == "batter":
-        rows = query_all(
-            """
-            SELECT player, team, impact_score,
-                   batting_impact, bowling_impact,
-                   runs_scored, wickets_taken
-            FROM player_scores
-            WHERE batting_impact > bowling_impact
-            ORDER BY impact_score DESC
-            LIMIT ?
-            """,
-            (limit,),
-        )
-    elif role == "bowler":
-        rows = query_all(
-            """
-            SELECT player, team, impact_score,
-                   batting_impact, bowling_impact,
-                   runs_scored, wickets_taken
-            FROM player_scores
-            WHERE bowling_impact >= batting_impact
-            ORDER BY impact_score DESC
-            LIMIT ?
-            """,
-            (limit,),
-        )
-    else:
-        rows = query_all(
-            """
-            SELECT player, team, impact_score,
-                   batting_impact, bowling_impact,
-                   runs_scored, wickets_taken
-            FROM player_scores
-            ORDER BY impact_score DESC
-            LIMIT ?
-            """,
-            (limit,),
-        )
+    """
+    Get the top players sorted by recency-weighted 3-layer impact score.
+    Supports filtering by minimum innings played, specific teams, and role.
+    Strictly isolated by gender.
+    """
+    team_list = teams.split(",") if teams else ALLOWED_TEAMS
+    
+    # Filter to only allowed teams for security/consistency
+    valid_teams = [t for t in team_list if t in ALLOWED_TEAMS]
+    if not valid_teams:
+        valid_teams = ALLOWED_TEAMS
 
-    return {"leaderboard": rows, "count": len(rows)}
+    data = get_leaderboard_data(
+        min_innings=min_innings,
+        teams=valid_teams,
+        role=role,
+        top_k=limit,
+        gender=gender
+    )
+    return {"leaderboard": data, "count": len(data)}
 
 
 @router.get("/stats")
 def get_global_stats():
-    """Get global statistics."""
-    total_players = query_all("SELECT COUNT(DISTINCT player) as count FROM player_scores")
-    total_matches = query_all("SELECT COUNT(DISTINCT match_id) as count FROM player_match_impacts")
-    avg_score = query_all("SELECT AVG(impact_score) as avg FROM player_scores")
+    """Get global statistics (filtered to allowed teams)."""
+    placeholders = ",".join("?" for _ in ALLOWED_TEAMS)
+
+    total_players = query_all(
+        f"SELECT COUNT(DISTINCT player) as count FROM player_scores WHERE team IN ({placeholders})",
+        tuple(ALLOWED_TEAMS),
+    )
+    total_matches = query_all(
+        f"SELECT COUNT(DISTINCT match_id) as count FROM player_match_impacts WHERE team IN ({placeholders})",
+        tuple(ALLOWED_TEAMS),
+    )
+    avg_score = query_all(
+        f"SELECT AVG(impact_score) as avg FROM player_scores WHERE team IN ({placeholders})",
+        tuple(ALLOWED_TEAMS),
+    )
 
     return {
         "total_players": total_players[0]["count"] if total_players else 0,
