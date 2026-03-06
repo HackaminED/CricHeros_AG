@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface LoadingScreenProps {
@@ -8,34 +8,42 @@ interface LoadingScreenProps {
 }
 
 /*
- * Loading Screen
- * ──────────────
- * Phase 1 (ball-flight): A cricket ball rolls/flies in from the edge, spinning
- *                         and growing as it approaches the camera.
- * Phase 2 (logo):        The ball shrinks into position as the "O" inside
- *                         "IMPACT HEROS". Text slides in around it.
- * Phase 3 (done):        Fade out to dashboard.
+ * Loading Screen – Video Intro → Logo Reveal
+ * ────────────────────────────────────────────
+ * Phase 1 (video):  Plays /intro.mp4 full-screen.
+ * Phase 2 (logo):   The classic IMPACT HEROS ball-to-logo animation.
+ * Phase 3 (done):   Fade out to dashboard.
  */
 
 export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
-  const [phase, setPhase] = useState<"ball-flight" | "logo" | "done">(
-    "ball-flight"
-  );
+  const [phase, setPhase] = useState<"video" | "logo" | "done">("video");
+  const videoRef = useRef<HTMLVideoElement>(null);
 
+  const goToLogo = () => {
+    if (phase === "video") setPhase("logo");
+  };
+
+  // Logo phase lasts ~2.5 seconds then fades out
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase("logo"), 2200);
-    const t2 = setTimeout(() => {
-      setPhase("done");
-      setTimeout(onComplete, 600);
-    }, 4000);
+    if (phase === "logo") {
+      const t = setTimeout(() => {
+        setPhase("done");
+        setTimeout(onComplete, 600);
+      }, 2500);
+      return () => clearTimeout(t);
+    }
+  }, [phase, onComplete]);
 
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
-  }, [onComplete]);
+  // Fallback: if video fails or takes too long, skip to logo after 15s
+  useEffect(() => {
+    const fallback = setTimeout(() => {
+      if (phase === "video") goToLogo();
+    }, 15000);
+    return () => clearTimeout(fallback);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Shared ball visual
+  // ── Shared ball visual (re-used from original) ──
   const BallVisual = ({ isLogo }: { isLogo: boolean }) => (
     <div
       className={`relative flex items-center justify-center rounded-full transition-all duration-700 ${
@@ -56,9 +64,6 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
         }`}
         style={{ transform: "rotate(-25deg)" }}
       />
-      {!isLogo && (
-        <div className="absolute top-[15%] right-[20%] w-[20%] h-[20%] bg-white/15 rounded-full blur-[2px]" />
-      )}
     </div>
   );
 
@@ -66,69 +71,42 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
     <AnimatePresence>
       {phase !== "done" && (
         <motion.div
-          className="fixed inset-0 z-50 bg-[#0a0a0a] overflow-hidden"
+          className="fixed inset-0 z-50 bg-black overflow-hidden"
           exit={{ opacity: 0 }}
           transition={{ duration: 0.6, ease: "easeInOut" }}
         >
-          {/* ── Ball Flight Phase ── */}
+          {/* ── Video Phase ── */}
           <AnimatePresence>
-            {phase === "ball-flight" && (
-              <motion.div className="absolute inset-0 z-20 flex items-center justify-center">
-                {/* Flying ball */}
-                <motion.div
-                  className="relative z-30 text-[80px] md:text-[120px]"
-                  initial={{
-                    x: 300,
-                    y: -250,
-                    scale: 0.3,
-                    rotate: 0,
-                    opacity: 0,
-                  }}
-                  animate={{
-                    x: 0,
-                    y: 20,
-                    scale: 4,
-                    rotate: 900,
-                    opacity: 1,
-                  }}
-                  exit={{
-                    scale: 0,
-                    opacity: 0,
-                    transition: { duration: 0.15 },
-                  }}
-                  transition={{
-                    duration: 2.2,
-                    ease: [0.22, 0.68, 0.36, 1],
-                  }}
-                >
-                  <BallVisual isLogo={false} />
-                </motion.div>
+            {phase === "video" && (
+              <motion.div
+                className="absolute inset-0"
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+              >
+                <video
+                  ref={videoRef}
+                  src="/intro.mp4"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  autoPlay
+                  muted
+                  playsInline
+                  onEnded={goToLogo}
+                />
 
-                {/* Trailing particles */}
-                <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden">
-                  {Array.from({ length: 12 }).map((_, i) => (
-                    <motion.div
-                      key={i}
-                      className="absolute w-1 h-1 bg-amber-400/50 rounded-full"
-                      style={{
-                        top: `${30 + Math.random() * 40}%`,
-                        left: `${45 + Math.random() * 15}%`,
-                      }}
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{
-                        opacity: [0, 0.7, 0],
-                        scale: [0, 2, 0],
-                        x: (Math.random() - 0.5) * 400,
-                        y: (Math.random() - 0.5) * 400,
-                      }}
-                      transition={{
-                        duration: 1.2 + Math.random(),
-                        delay: i * 0.12,
-                        ease: "easeOut",
-                      }}
-                    />
-                  ))}
-                </div>
+
+                {/* Gradient over bottom for skip button */}
+                <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/60 to-transparent pointer-events-none z-10" />
+
+                {/* Skip Button */}
+                <motion.button
+                  onClick={goToLogo}
+                  className="absolute bottom-5 right-5 px-14 py-5 rounded-2xl text-lg font-bold text-white bg-black border border-white/30 hover:bg-gray-900 transition-all duration-300 z-20 shadow-lg"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  Skip Intro →
+                </motion.button>
               </motion.div>
             )}
           </AnimatePresence>
@@ -195,6 +173,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
                   }}
                 />
 
+                {/* Shine sweep */}
                 <motion.div
                   className="absolute inset-0 pointer-events-none"
                   initial={{ x: "-100%" }}

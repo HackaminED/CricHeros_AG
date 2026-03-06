@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Original video file (duplicate of public/intro.mp4)
+WhatsApp Video*
