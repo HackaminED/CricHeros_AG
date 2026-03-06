@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface LoadingScreenProps {
@@ -8,22 +8,23 @@ interface LoadingScreenProps {
 }
 
 export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
-  const [phase, setPhase] = useState<'windup' | 'strike' | 'flight' | 'logo' | 'done'>('windup');
+  const [phase, setPhase] = useState<'video' | 'logo' | 'done'>('video');
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    // Elegant timing sequence
-    const windupTimer = setTimeout(() => setPhase('strike'), 800);
-    const flightTimer = setTimeout(() => setPhase('flight'), 1100);
-    const logoTimer = setTimeout(() => setPhase('logo'), 2200);
+    // We will transition to the logo after 3.8 seconds which is roughly when the ball leaves the frame
+    // in the cinematic video.
+    const transitionTimer = setTimeout(() => {
+      setPhase('logo');
+    }, 3800);
+
     const completeTimer = setTimeout(() => {
       setPhase('done');
-      setTimeout(onComplete, 800); // Wait for exit animation
-    }, 4500);
+      setTimeout(onComplete, 800);
+    }, 6000);
 
     return () => {
-      clearTimeout(windupTimer);
-      clearTimeout(flightTimer);
-      clearTimeout(logoTimer);
+      clearTimeout(transitionTimer);
       clearTimeout(completeTimer);
     };
   }, [onComplete]);
@@ -32,100 +33,71 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
     <AnimatePresence>
       {phase !== 'done' && (
         <motion.div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#050505] overflow-hidden"
-          exit={{ opacity: 0, filter: "blur(10px)" }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black overflow-hidden pointer-events-none"
+          exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: "easeInOut" }}
         >
-          {/* Subtle Background Grid/Glow */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.05)_0%,transparent_70%)] pointer-events-none" />
-
+          {/* Phase 1: Realistic Video playback */}
           <AnimatePresence>
-            {/* Phase 1-3: The Abstract Strike & Flight */}
-            {phase !== 'logo' && (
-              <div className="relative w-full h-full flex items-center justify-center">
-                
-                {/* 1. The "Ball" (Data Node) approaching */}
-                <motion.div
-                  className="absolute w-4 h-4 rounded-full bg-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.8)]"
-                  initial={{ x: '100vw', y: '20vh', scale: 0.5, opacity: 0 }}
-                  animate={
-                    phase === 'windup' 
-                      ? { x: '15vw', y: '5vh', scale: 1, opacity: 1 } // Approaching the strike zone
-                      : phase === 'strike' 
-                        ? { x: '0vw', y: '0vh', scale: 1.2, opacity: 1 } // Moment of impact
-                        : { x: '-60vw', y: '-30vh', scale: 0.2, opacity: 0 } // Flying away
-                  }
-                  transition={{ 
-                    duration: phase === 'windup' ? 0.8 : phase === 'strike' ? 0.1 : 1.2, 
-                    ease: phase === 'flight' ? "easeOut" : "easeIn" 
-                  }}
+            {phase === 'video' && (
+              <motion.div 
+                className="absolute inset-0 w-full h-full"
+                exit={{ opacity: 0, scale: 1.1, filter: "brightness(2)" }} // Flash transition
+                transition={{ duration: 0.4 }}
+              >
+                <video
+                  ref={videoRef}
+                  src="/cinematic_swing.mp4"
+                  autoPlay
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover"
                 />
-
-                {/* 2. The "Strike" / Impact Flash */}
-                {phase === 'strike' && (
-                  <motion.div
-                    className="absolute w-px h-[200vh] bg-linear-to-b from-transparent via-emerald-100 to-transparent shadow-[0_0_50px_rgba(255,255,255,0.8)]"
-                    initial={{ opacity: 0, rotate: 25, scaleY: 0 }}
-                    animate={{ opacity: [0, 1, 0], scaleY: [0, 1, 0] }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    style={{ left: '50%', transformOrigin: 'center' }}
-                  />
-                )}
                 
-                {/* Ripple Effect on Impact */}
-                {phase === 'strike' && (
-                  <motion.div
-                    className="absolute w-32 h-32 rounded-full border-2 border-emerald-400/50"
-                    initial={{ scale: 0, opacity: 1 }}
-                    animate={{ scale: 4, opacity: 0 }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                  />
-                )}
-              </div>
+                {/* Subtle dark vignette to make the transition and text later look better */}
+                <div className="absolute inset-0 shadow-[inset_0_0_150px_rgba(0,0,0,0.8)]" />
+              </motion.div>
             )}
+          </AnimatePresence>
 
-            {/* Phase 4: The Logo Reveal */}
+          {/* Phase 2: Logo Crash */}
+          <AnimatePresence>
             {phase === 'logo' && (
               <motion.div
-                className="flex items-center justify-center relative z-10"
-                initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} // smooth easeOut
+                className="flex flex-col items-center justify-center relative z-10 w-full h-full bg-[#0a0a0a]"
+                initial={{ opacity: 0, scale: 2 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, ease: "easeOut" }} // hard crash
               >
-                <div className="flex items-center text-4xl md:text-6xl lg:text-7xl font-sans font-extrabold tracking-tight text-white">
-                  <span className="text-gray-200">
-                    IMPACT HER
-                  </span>
+                <div className="flex items-center text-5xl md:text-7xl lg:text-8xl font-sans font-black tracking-tighter text-white">
+                  <span>IMPACT HER</span>
                   
-                  {/* The Abstract "O" dropping into place */}
+                  {/* The Ball forming 'O' */}
                   <div className="relative flex items-center justify-center mx-1 md:mx-2 w-[0.8em] h-[0.8em]">
-                    {/* The glowing ring of the O */}
                     <motion.div
-                      className="absolute inset-0 rounded-full border-[3px] md:border-[5px] border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.3)] bg-gray-900/50 backdrop-blur-sm"
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+                      className="absolute inset-0 rounded-full border-[6px] md:border-[10px] border-emerald-500 shadow-xl"
+                      initial={{ scale: 3, opacity: 0, rotate: -180 }}
+                      animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                      transition={{ type: 'spring', damping: 12, stiffness: 200 }}
                     />
-                    
-                    {/* The inner core (the "ball" from earlier) landing in the O */}
-                    <motion.div
-                      className="absolute w-2 h-2 md:w-3 md:h-3 rounded-full bg-emerald-300 shadow-[0_0_15px_rgba(16,185,129,1)]"
-                      initial={{ y: -200, opacity: 0, scale: 0 }}
-                      animate={{ y: 0, opacity: 1, scale: 1 }}
-                      transition={{ 
-                        type: "spring", 
-                        damping: 15, 
-                        stiffness: 100, 
-                        mass: 0.8,
-                        delay: 0.4
-                      }}
+                    {/* The Seam of the ball */}
+                    <motion.div 
+                      className="absolute w-full h-1 bg-emerald-500/50 rounded-full"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.4 }}
                     />
                   </div>
 
-                  <span className="text-gray-200">
-                    S
-                  </span>
+                  <span>S</span>
                 </div>
+                
+                <motion.div
+                  className="mt-6 h-1 bg-emerald-500 rounded-full"
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: "200px", opacity: 1 }}
+                  transition={{ duration: 1, delay: 0.5, ease: "circOut" }}
+                />
               </motion.div>
             )}
           </AnimatePresence>
