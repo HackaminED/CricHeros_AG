@@ -26,13 +26,20 @@ export default function Home() {
   const [showLoading, setShowLoading] = useState(true);
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white selection:bg-emerald-500/30 font-sans pb-20">
+    <main className="min-h-screen bg-background text-foreground selection:bg-emerald-500/30 overflow-x-hidden pb-32">
       
       {showLoading && (
         <LoadingScreen onComplete={() => setShowLoading(false)} />
       )}
 
-      {/* Header */}
+      {/* Hero Background Elements */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-emerald-deep/20 blur-[120px] rounded-full mix-blend-screen" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-ocean-deep/40 blur-[150px] rounded-full mix-blend-screen" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto">
+        {/* Header */}
       <header className="px-6 py-8 md:py-12 max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
@@ -48,20 +55,20 @@ export default function Home() {
         <div className="flex bg-gray-900/80 p-1.5 rounded-full border border-gray-800 backdrop-blur-sm">
           <button 
             onClick={() => setActiveTab('overview')}
-            className={`px-6 py-2 rounded-full text-sm font-semibold transition-all shadow-sm ${activeTab === 'overview' ? 'bg-gray-800 text-white shadow-black/50' : 'text-gray-400 hover:text-white'}`}
+            className={`px-8 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${activeTab === 'overview' ? 'bg-white/10 text-white shadow-[0_0_20px_rgba(255,255,255,0.05)] border border-white/10' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
           >
             Dashboard
           </button>
           <button 
             onClick={() => setActiveTab('model')}
-            className={`px-6 py-2 rounded-full text-sm font-semibold transition-all shadow-sm ${activeTab === 'model' ? 'bg-gray-800 text-white shadow-black/50' : 'text-gray-400 hover:text-white'}`}
+            className={`px-8 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${activeTab === 'model' ? 'bg-white/10 text-white shadow-[0_0_20px_rgba(255,255,255,0.05)] border border-white/10' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
           >
             Mathematical Model
           </button>
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="px-6 pt-12">
         {activeTab === 'overview' ? (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Top Stats Row */}
@@ -78,35 +85,39 @@ export default function Home() {
             </div>
 
             {/* Metric Breakdown Cards */}
-            <h2 className="text-xl font-bold mt-12 mb-6 flex items-center gap-2">
-              <Activity className="w-5 h-5 text-emerald-500" />
-              Impact Components Breakdown (Latest Match)
+            <h2 className="text-2xl font-bold mt-16 mb-8 flex items-center gap-3 animate-slide-up" style={{ animationDelay: '0.4s' }}>
+              <Activity className="w-6 h-6 text-emerald-400" />
+              Impact Components Breakdown
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-gradient-to-br from-gray-900 to-gray-800/50 p-6 rounded-2xl border border-gray-800/80 hover:border-emerald-500/30 transition-colors">
-                <Target className="w-6 h-6 text-emerald-400 mb-4" />
-                <h3 className="text-lg font-bold">Performance</h3>
-                <p className="text-gray-400 text-sm mt-2">Raw output: 78 off 42 balls. High strike rate translates to a high base score.</p>
-                <div className="mt-4 text-2xl font-black text-white">82 <span className="text-sm font-medium text-gray-500">/100</span></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 animate-slide-up" style={{ animationDelay: '0.5s' }}>
+              <div className="group bg-ocean-deep/40 p-8 rounded-3xl border border-white/5 hover:border-emerald-500/30 transition-all duration-500 hover:shadow-[0_0_30px_rgba(16,185,129,0.1)] relative overflow-hidden backdrop-blur-sm">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-[50px] group-hover:bg-emerald-500/20 transition-all duration-500" />
+                <Target className="w-8 h-8 text-emerald-400 mb-6" />
+                <h3 className="text-xl font-bold text-white tracking-tight">Performance</h3>
+                <p className="text-gray-400 text-sm mt-3 leading-relaxed">Raw output: 78 off 42 balls. High strike rate translates to a high base score.</p>
+                <div className="mt-8 text-4xl font-black text-white tracking-tighter">82 <span className="text-base font-medium text-gray-500">/100</span></div>
               </div>
 
-              <div className="bg-gradient-to-br from-gray-900 to-gray-800/50 p-6 rounded-2xl border border-gray-800/80 hover:border-teal-500/30 transition-colors">
-                <Info className="w-6 h-6 text-teal-400 mb-4" />
-                <h3 className="text-lg font-bold">Match Context</h3>
-                <p className="text-gray-400 text-sm mt-2">Team was 32/4 inside powerplay. Chasing 180+. Very high context multiplier.</p>
-                <div className="mt-4 text-2xl font-black text-white">1.4x <span className="text-sm font-medium text-gray-500">Multiplier</span></div>
+              <div className="group bg-ocean-deep/40 p-8 rounded-3xl border border-white/5 hover:border-teal-500/30 transition-all duration-500 hover:shadow-[0_0_30px_rgba(20,184,166,0.1)] relative overflow-hidden backdrop-blur-sm">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/10 rounded-full blur-[50px] group-hover:bg-teal-500/20 transition-all duration-500" />
+                <Info className="w-8 h-8 text-teal-400 mb-6" />
+                <h3 className="text-xl font-bold text-white tracking-tight">Match Context</h3>
+                <p className="text-gray-400 text-sm mt-3 leading-relaxed">Team was 32/4 inside powerplay. Chasing 180+. Very high context multiplier.</p>
+                <div className="mt-8 text-4xl font-black text-white tracking-tighter">1.4x <span className="text-base font-medium text-gray-500">Mult</span></div>
               </div>
 
-              <div className="bg-gradient-to-br from-gray-900 to-gray-800/50 p-6 rounded-2xl border border-gray-800/80 hover:border-amber-500/30 transition-colors">
-                <TrendingUp className="w-6 h-6 text-amber-400 mb-4" />
-                <h3 className="text-lg font-bold">Situation (Pressure)</h3>
-                <p className="text-gray-400 text-sm mt-2">Knockout game. Player was out of form previously. Maximum pressure scenarios.</p>
-                <div className="mt-4 text-2xl font-black text-white">1.2x <span className="text-sm font-medium text-gray-500">Multiplier</span></div>
+              <div className="group bg-ocean-deep/40 p-8 rounded-3xl border border-white/5 hover:border-amber-500/30 transition-all duration-500 hover:shadow-[0_0_30px_rgba(245,158,11,0.1)] relative overflow-hidden backdrop-blur-sm">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-[50px] group-hover:bg-amber-500/20 transition-all duration-500" />
+                <TrendingUp className="w-8 h-8 text-amber-400 mb-6" />
+                <h3 className="text-xl font-bold text-white tracking-tight">Situation (Pressure)</h3>
+                <p className="text-gray-400 text-sm mt-3 leading-relaxed">Knockout game. Player was out of form previously. Maximum pressure scenarios.</p>
+                <div className="mt-8 text-4xl font-black text-white tracking-tighter">1.2x <span className="text-base font-medium text-gray-500">Mult</span></div>
               </div>
             </div>
           </div>
         ) : (
-          <div className="bg-gray-900/40 border border-gray-800 p-8 rounded-3xl animate-in fade-in zoom-in-95 duration-500">
+          <div className="bg-ocean-deep/40 border border-white/5 p-10 md:p-16 rounded-[2.5rem] animate-fade-in backdrop-blur-md relative overflow-hidden">
+            <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-emerald-500/10 blur-[120px] rounded-full mix-blend-screen pointer-events-none" />
             <h2 className="text-2xl font-bold mb-6 text-emerald-400">Mathematical Formulation</h2>
             
             <div className="prose prose-invert prose-emerald max-w-none">
@@ -151,6 +162,7 @@ export default function Home() {
             </div>
           </div>
         )}
+      </div>
       </div>
     </main>
   );
