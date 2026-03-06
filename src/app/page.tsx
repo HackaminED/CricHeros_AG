@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ImpactMeter from '@/components/ImpactMeter';
 import ImpactTrendChart from '@/components/ImpactTrendChart';
+import LoadingScreen from '@/components/LoadingScreen';
 import { Activity, Info, Trophy, Target, TrendingUp } from 'lucide-react';
 
 // Mock Data for the last 10 innings
@@ -22,9 +23,15 @@ const mockInningsData = [
 export default function Home() {
   const latestImpact = mockInningsData[mockInningsData.length - 1].impact;
   const [activeTab, setActiveTab] = useState<'overview' | 'model'>('overview');
+  const [showLoading, setShowLoading] = useState(true);
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white selection:bg-emerald-500/30 font-sans pb-20">
+      
+      {showLoading && (
+        <LoadingScreen onComplete={() => setShowLoading(false)} />
+      )}
+
       {/* Header */}
       <header className="px-6 py-8 md:py-12 max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
         <div>
