@@ -47,7 +47,7 @@ python -m ml_pipeline.compute_impact_dataset
 ### 4. Start the backend
 
 ```bash
-uvicorn backend.app:app --reload --port 8000
+python -m uvicorn backend.app:app --reload --port 8000
 ```
 
 ### 5. Install and start the frontend
