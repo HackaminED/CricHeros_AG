@@ -3,6 +3,8 @@ players.py — Player-related API routes.
 """
 
 from fastapi import APIRouter, HTTPException, Query
+from backend.services.wpa_service import get_player_wpa
+from backend.services.cis_engine import get_player_cis
 from backend.database.db import query_all, query_one
 from backend.services.impact_engine import get_player_impact_data, ALLOWED_TEAMS
 from backend.services.rolling_impact import get_player_rolling_trend, get_player_career_stats

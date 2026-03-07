@@ -63,6 +63,10 @@ export const getPlayerWpa = (playerName, lastN = 10, gender = 'Men') =>
 export const getLeaderboardClutch = (gender = 'Men', minMatches = 5, topK = 100) =>
     api.get('/leaderboard/clutch', { params: { gender, min_matches: minMatches, top_k: topK } }).then(r => r.data);
 
+// Player CIS (Counterfactual Impact Score / Choke Index)
+export const getPlayerCis = (playerName, lastN = 10, gender = 'Men') =>
+    api.get(`/players/${encodeURIComponent(playerName)}/cis`, { params: { last_n: lastN, gender } }).then(r => r.data);
+
 // Stats
 export const getStats = () =>
     api.get('/stats').then(r => r.data);

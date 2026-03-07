@@ -8,7 +8,8 @@ import ExplainModal from '../components/ExplainModal';
 import StatInfoModal from '../components/StatInfoModal';
 import InningsTable from '../components/InningsTable';
 import CategoryBadge from '../components/CategoryBadge';
-import { getPlayerImpact, getPlayerTrend, getPlayerWpa } from '../api/api';
+import ChokeIndexMeter from '../components/ChokeIndexMeter';
+import { getPlayerImpact, getPlayerTrend, getPlayerWpa, getPlayerCis } from '../api/api';
 import { useGender } from '../context/GenderContext';
 
 const SECTION_GAP = 40;
@@ -64,6 +65,7 @@ export default function PlayerDashboard() {
   const [trendData, setTrendData] = useState([]);
   const [trend3Layer, setTrend3Layer] = useState([]);
   const [wpaData, setWpaData] = useState(null);
+  const [cisData, setCisData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [lastN, setLastN] = useState(10);
@@ -87,10 +89,11 @@ export default function PlayerDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const [impact, trend, wpa] = await Promise.all([
+      const [impact, trend, wpa, cis] = await Promise.all([
         getPlayerImpact(name, lastN, currentGender),
         getPlayerTrend(name, 10, lastN, currentGender),
         getPlayerWpa(name, lastN, currentGender).catch(() => null),
+        getPlayerCis(name, lastN, currentGender).catch(() => null),
       ]);
 
       if (impact.gender && impact.gender !== currentGender) {
@@ -102,12 +105,14 @@ export default function PlayerDashboard() {
       setTrendData(trend.trend || []);
       setTrend3Layer(trend.trend_3layer || impact.last_n_innings || []);
       setWpaData(wpa || null);
+      setCisData(cis || null);
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to load player data');
       setPlayerData(null);
       setTrendData([]);
       setTrend3Layer([]);
       setWpaData(null);
+      setCisData(null);
     } finally {
       setLoading(false);
     }
@@ -303,6 +308,14 @@ export default function PlayerDashboard() {
                     {(wpaData.clutch_impact_percent >= 0 ? '+' : '')}{wpaData.clutch_impact_percent}%
                   </p>
                   <p className="text-xs text-[var(--text-secondary)] mt-1">Avg swing per match</p>
+                </div>
+              )}
+              {cisData && cisData.choke_index !== null && (
+                <div
+                  className="rounded-2xl dark-no-border card-hover flex items-center justify-center p-2"
+                  style={{ background: 'var(--surface-card)', boxShadow: 'var(--shadow-soft)', border: '1px solid var(--glass-border)' }}
+                >
+                  <ChokeIndexMeter value={cisData.choke_index} theme="indigo" />
                 </div>
               )}
               <StatCard
