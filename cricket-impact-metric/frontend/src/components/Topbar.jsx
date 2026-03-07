@@ -18,7 +18,7 @@ export default function Topbar({ className = '' }) {
           IM
         </div>
         <h1 className="font-display font-bold text-[var(--text-primary)] text-lg md:text-xl">
-          Cricket Impact Metric
+          Impact Heros
         </h1>
       </div>
       <button

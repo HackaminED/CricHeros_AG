@@ -1,5 +1,5 @@
 /**
- * Cricket Impact — Neo-Brutalist Design Tokens
+ * Impact Heros — Neo-Brutalist Design Tokens
  * 60/30/10: --bg (60%), --surface (30%), --accent (10%)
  * No hard corners: use --radius-* everywhere.
  */
@@ -65,8 +65,8 @@
   --accent: #FF6700;
   --accent-strong: #5B9BD5;
   --muted: #5a6b7d;
-  --text-primary: #EBEBEB;
-  --text-secondary: #a8b8c8;
+  --text-primary: #E6EDF3;
+  --text-secondary: #9BA3AF;
   --surface-muted: rgba(58, 110, 165, 0.2);
   --surface-card: rgba(58, 110, 165, 0.25);
   --surface-panel: rgba(58, 110, 165, 0.15);

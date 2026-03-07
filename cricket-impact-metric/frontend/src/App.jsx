@@ -8,12 +8,10 @@ import Leaderboard from './pages/Leaderboard';
 import LandingPage from './pages/LandingPage';
 import LoadingScreen from './components/LoadingScreen';
 import Sidebar from './components/Sidebar';
-import Topbar from './components/Topbar';
 
 function AppContent() {
   return (
     <>
-      <Topbar />
       <main className="flex-1">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 md:py-8" style={{ '--grid-gap': '24px' }}>
           <Routes>

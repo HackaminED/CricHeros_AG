@@ -149,12 +149,6 @@ export default function ImpactGauge({
           {animatedScore}
         </div>
       </div>
-
-      <div className="flex justify-between w-full mt-4 max-w-[10rem] text-[10px] font-semibold text-[var(--text-secondary)]">
-        <span>0</span>
-        <span>50</span>
-        <span>100</span>
-      </div>
     </div>
   );
 }

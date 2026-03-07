@@ -6,14 +6,17 @@ import PlayerSearch from '../components/PlayerSearch';
 import ExplainModal from '../components/ExplainModal';
 import InningsTable from '../components/InningsTable';
 import CategoryBadge from '../components/CategoryBadge';
-import { getPlayerImpact, getPlayerTrend } from '../api/api';
+import { getPlayerImpact, getPlayerTrend, getPlayerWpa } from '../api/api';
 import { useGender } from '../context/GenderContext';
+
+const CARD_PADDING = '20px';
+const SECTION_GAP = 32;
 
 function StatCard({ label, value, sub, colorClass = 'text-[var(--accent-strong)]', info }) {
   return (
     <div
-      className="rounded-[var(--radius-lg)] p-4 relative group"
-      style={{ background: 'var(--surface-card)', boxShadow: 'var(--shadow-soft)', border: '1px solid rgba(58,110,165,0.15)' }}
+      className="rounded-[var(--radius-lg)] relative group dark-no-border"
+      style={{ padding: CARD_PADDING, background: 'var(--surface-card)', boxShadow: 'var(--shadow-soft)' }}
     >
       <p className="text-[var(--text-small)] text-[var(--text-secondary)] uppercase tracking-wider mb-1">{label}</p>
       <p className={`text-2xl font-display font-bold tabular-nums ${colorClass}`}>{value ?? '—'}</p>
@@ -35,6 +38,7 @@ export default function PlayerDashboard() {
   const [playerData, setPlayerData] = useState(null);
   const [trendData, setTrendData] = useState([]);
   const [trend3Layer, setTrend3Layer] = useState([]);
+  const [wpaData, setWpaData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [lastN, setLastN] = useState(10);
@@ -52,9 +56,10 @@ export default function PlayerDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const [impact, trend] = await Promise.all([
+      const [impact, trend, wpa] = await Promise.all([
         getPlayerImpact(name, lastN, currentGender),
         getPlayerTrend(name, 10, lastN, currentGender),
+        getPlayerWpa(name, lastN, currentGender).catch(() => null),
       ]);
 
       if (impact.gender && impact.gender !== currentGender) {
@@ -65,11 +70,13 @@ export default function PlayerDashboard() {
       setPlayerData(impact);
       setTrendData(trend.trend || []);
       setTrend3Layer(trend.trend_3layer || impact.last_n_innings || []);
+      setWpaData(wpa || null);
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to load player data');
       setPlayerData(null);
       setTrendData([]);
       setTrend3Layer([]);
+      setWpaData(null);
     } finally {
       setLoading(false);
     }
@@ -131,10 +138,10 @@ export default function PlayerDashboard() {
 
       {playerData && !loading && (
         <>
-          {/* Player header + Impact Gauge */}
+          {/* 1. Player Info + Impact Score */}
           <div
-            className="rounded-[var(--radius-lg)] p-6 md:p-8 relative overflow-hidden"
-            style={{ background: 'var(--surface-card)', boxShadow: 'var(--shadow-strong)', border: '1px solid rgba(58,110,165,0.2)' }}
+            className="rounded-[var(--radius-lg)] relative overflow-hidden dark-no-border"
+            style={{ padding: CARD_PADDING, background: 'var(--surface-card)', boxShadow: 'var(--shadow-strong)', marginBottom: SECTION_GAP }}
           >
             <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
               <ImpactGauge
@@ -143,7 +150,6 @@ export default function PlayerDashboard() {
                 onInfoClick={() => setShowExplain(true)}
                 showNeonRim={playerData.impact_score >= 80}
               />
-
               <div className="flex-1 text-center md:text-left">
                 <h2
                   className="font-display font-bold text-[var(--text-primary)] mb-1 flex items-center justify-center md:justify-start gap-3"
@@ -168,86 +174,104 @@ export default function PlayerDashboard() {
                     <CategoryBadge category={playerData.category} />
                   </span>
                 )}
+              </div>
+            </div>
+          </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
-                  <StatCard
-                    label="Batting Component"
-                    value={playerData.batting_impact_component?.toFixed(1) || '0'}
-                    sub="Avg performance"
-                    colorClass={playerData.batting_impact_component > 0 ? 'text-[var(--accent-strong)]' : 'text-[var(--accent)]'}
-                    info="Average batting performance score across last N innings"
-                  />
-                  <StatCard
-                    label="Bowling Component"
-                    value={playerData.bowling_impact_component?.toFixed(1) || '0'}
-                    sub="Avg performance"
-                    colorClass={playerData.bowling_impact_component > 0 ? 'text-[var(--accent-strong)]' : 'text-[var(--text-secondary)]'}
-                    info="Average bowling performance score across last N innings"
-                  />
-                  <StatCard
-                    label="Total Innings"
-                    value={playerData.total_innings ?? 0}
-                    sub={`Showing last ${playerData.last_n_count ?? 0}`}
-                  />
+          {/* Last N slider - shared for all sections */}
+          <div className="flex items-center justify-end gap-3" style={{ marginBottom: SECTION_GAP }}>
+            <span className="text-[var(--text-small)] text-[var(--text-secondary)]">Last N games:</span>
+            <input
+              type="range"
+              min={1}
+              max={10}
+              value={lastN}
+              onChange={(e) => setLastN(Number(e.target.value))}
+              className="w-28 accent-[var(--accent-strong)]"
+              id="last-n-slider"
+              aria-label="Number of last games"
+            />
+            <span className="text-sm font-mono font-bold w-6 text-center text-[var(--accent-strong)] tabular-nums">{lastN}</span>
+          </div>
+
+          {/* 2. Performance Metrics */}
+          <section style={{ marginBottom: SECTION_GAP }}>
+            <h3 className="font-display font-semibold text-[var(--text-primary)] mb-4" style={{ fontSize: 'var(--text-h3)' }}>
+              Performance Metrics
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              <StatCard label="Runs" value={stats?.runs} colorClass="text-[var(--accent)]" />
+              <StatCard label="Strike Rate" value={stats?.strike_rate} colorClass="text-[var(--accent-strong)]" />
+              <StatCard label="Bat Average" value={stats?.batting_average} colorClass="text-[var(--text-primary)]" />
+              <StatCard label="Innings" value={stats?.innings ?? playerData?.last_n_count} />
+              <StatCard label="Wickets" value={stats?.wickets} colorClass="text-[var(--text-primary)]" />
+              <StatCard label="Economy" value={stats?.economy} colorClass="text-[var(--accent)]" />
+            </div>
+          </section>
+
+          {/* 3. Match Context */}
+          <section style={{ marginBottom: SECTION_GAP }}>
+            <h3 className="font-display font-semibold text-[var(--text-primary)] mb-4" style={{ fontSize: 'var(--text-h3)' }}>
+              Match Context
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <StatCard
+                label="Average Context Weight"
+                value={playerData.context_weight_avg != null ? `${playerData.context_weight_avg}×` : '—'}
+                sub="1.0 = normal situations; >1.0 = tougher match conditions"
+                info="How difficult the situations were when the player batted or bowled. 1.0 = normal situations, >1.0 = tougher match conditions."
+              />
+              <StatCard
+                label="Average Pressure Index"
+                value={playerData.pressure_index_avg != null ? `${playerData.pressure_index_avg}×` : '—'}
+                sub="Higher values = more critical moments"
+                info="Measures match pressure during player events. Higher values indicate more critical moments."
+              />
+            </div>
+          </section>
+
+          {/* 4. Impact Metrics (Clutch, Weighted Impact) */}
+          <section style={{ marginBottom: SECTION_GAP }}>
+            <h3 className="font-display font-semibold text-[var(--text-primary)] mb-4" style={{ fontSize: 'var(--text-h3)' }}>
+              Impact Metrics
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {wpaData && (
+                <div
+                  className="rounded-[var(--radius-lg)] relative group dark-no-border"
+                  style={{ padding: CARD_PADDING, background: 'var(--surface-card)', boxShadow: 'var(--shadow-soft)' }}
+                >
+                  <p className="text-[var(--text-small)] text-[var(--text-secondary)] uppercase tracking-wider mb-1 flex items-center gap-1">
+                    Clutch <span className="cursor-help text-[var(--text-secondary)]" title="Clutch: total win probability swing (percent points) the player added per match.">ℹ</span>
+                  </p>
+                  <p className={`text-3xl font-display font-bold tabular-nums ${(wpaData.clutch_impact_percent || 0) >= 0 ? 'text-[var(--accent-strong)]' : 'text-[var(--accent)]'}`}>
+                    {(wpaData.clutch_impact_percent >= 0 ? '+' : '')}{wpaData.clutch_impact_percent}%
+                  </p>
+                  <p className="text-[var(--text-small)] text-[var(--text-secondary)] mt-1">Avg swing per match</p>
                 </div>
-              </div>
+              )}
+              <StatCard
+                label="Weighted Impact"
+                value={playerData.impact_weighted != null ? playerData.impact_weighted : '—'}
+                sub="Context-weighted impact"
+                info="Impact score adjusted for match context (difficulty of situations)."
+              />
             </div>
-          </div>
+          </section>
 
-          {/* Last N Stats */}
-          <div
-            className="rounded-[var(--radius-lg)] p-6"
-            style={{ background: 'var(--surface-card)', boxShadow: 'var(--shadow-soft)', border: '1px solid rgba(58,110,165,0.15)' }}
-          >
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="font-display font-semibold text-[var(--text-primary)]" style={{ fontSize: 'var(--text-h3)' }}>
-                Stats for Last {lastN} {lastN === 1 ? 'Game' : 'Games'}
-              </h3>
-              <div className="flex items-center gap-3">
-                <span className="text-[var(--text-small)] text-[var(--text-secondary)]">Last N:</span>
-                <input
-                  type="range"
-                  min={1}
-                  max={10}
-                  value={lastN}
-                  onChange={(e) => setLastN(Number(e.target.value))}
-                  className="w-28 accent-[var(--accent-strong)]"
-                  id="last-n-slider"
-                  aria-label="Number of last games"
-                />
-                <span className="text-sm font-mono font-bold w-6 text-center text-[var(--accent-strong)] tabular-nums">
-                  {lastN}
-                </span>
-              </div>
+          {/* 5. Recent Match Trend */}
+          <section style={{ marginBottom: SECTION_GAP }}>
+            <h3 className="font-display font-semibold text-[var(--text-primary)] mb-4" style={{ fontSize: 'var(--text-h3)' }}>
+              Recent Match Trend
+            </h3>
+            <div className="rounded-[var(--radius-lg)] dark-no-border" style={{ padding: CARD_PADDING, background: 'var(--surface-card)', boxShadow: 'var(--shadow-soft)' }}>
+              {trend3Layer.length > 0 ? (
+                <ImpactTrendChart data={trend3Layer} height={380} use3Layer />
+              ) : (
+                <ImpactTrendChart data={trendData} height={380} />
+              )}
             </div>
-
-            {stats && (
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                <StatCard label="Innings" value={stats.innings} />
-                <StatCard label="Runs" value={stats.runs} colorClass="text-[var(--accent)]" info="Total runs in last N" />
-                <StatCard label="Strike Rate" value={stats.strike_rate} colorClass="text-[var(--accent-strong)]" />
-                <StatCard label="Bat Average" value={stats.batting_average} colorClass="text-[var(--surface)]" />
-                <StatCard label="Wickets" value={stats.wickets} colorClass="text-[var(--surface)]" />
-                <StatCard label="Economy" value={stats.economy} colorClass="text-[var(--accent)]" info="Runs per over" />
-              </div>
-            )}
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
-              <StatCard label="Avg Context Weight" value={playerData.context_weight_avg ? `${playerData.context_weight_avg}×` : '—'} />
-              <StatCard label="Avg Pressure Index" value={playerData.pressure_index_avg ? `${playerData.pressure_index_avg}×` : '—'} />
-              <StatCard label="Weighted Impact" value={playerData.impact_weighted} />
-              <StatCard label="Bowling SR" value={stats?.bowling_strike_rate ?? '—'} />
-            </div>
-          </div>
-
-          {/* Trend chart */}
-          <div>
-            {trend3Layer.length > 0 ? (
-              <ImpactTrendChart data={trend3Layer} height={380} use3Layer />
-            ) : (
-              <ImpactTrendChart data={trendData} height={380} />
-            )}
-          </div>
+          </section>
 
           {/* Innings table */}
           {playerData.last_n_innings && playerData.last_n_innings.length > 0 && (
@@ -257,8 +281,8 @@ export default function PlayerDashboard() {
           {/* Career */}
           {career && (
             <div
-              className="rounded-[var(--radius-lg)] p-6"
-              style={{ background: 'var(--surface-card)', boxShadow: 'var(--shadow-soft)' }}
+              className="rounded-[var(--radius-lg)] dark-no-border"
+              style={{ padding: CARD_PADDING, background: 'var(--surface-card)', boxShadow: 'var(--shadow-soft)' }}
             >
               <h3 className="font-display font-semibold text-[var(--text-primary)] mb-4" style={{ fontSize: 'var(--text-h3)' }}>
                 Career Statistics

@@ -7,6 +7,7 @@ from backend.database.db import query_all
 from backend.services.impact_engine import (
     get_leaderboard_data, ALLOWED_TEAMS, MIN_INNINGS_LEADERBOARD,
 )
+from backend.services.cis_engine import get_cis_leaderboard, get_clutch_leaderboard
 
 router = APIRouter(tags=["impact"])
 
@@ -38,6 +39,28 @@ def get_leaderboard(
         top_k=limit,
         gender=gender
     )
+    return {"leaderboard": data, "count": len(data)}
+
+
+@router.get("/leaderboard/cis")
+def get_leaderboard_cis(
+    gender: str = "Men",
+    min_innings: int = Query(10, ge=1, le=50),
+    top_k: int = Query(100, ge=1, le=200),
+):
+    """Leaderboard sorted by CIS normalized (50 = replacement level)."""
+    data = get_cis_leaderboard(gender=gender, min_innings=min_innings, top_k=top_k)
+    return {"leaderboard": data, "count": len(data)}
+
+
+@router.get("/leaderboard/clutch")
+def get_leaderboard_clutch(
+    gender: str = "Men",
+    min_matches: int = Query(5, ge=1, le=50),
+    top_k: int = Query(100, ge=1, le=200),
+):
+    """Leaderboard sorted by average match swing (Clutch Impact %)."""
+    data = get_clutch_leaderboard(gender=gender, min_matches=min_matches, top_k=top_k)
     return {"leaderboard": data, "count": len(data)}
 
 
