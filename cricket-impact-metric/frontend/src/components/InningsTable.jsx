@@ -1,10 +1,11 @@
 import React from 'react';
+import AnimatedList from './AnimatedList';
 
 export default function InningsTable({ innings = [], highPressureThreshold = 1.5 }) {
   if (!innings || innings.length === 0) {
     return (
       <div
-        className="rounded-[var(--radius-lg)] p-6 text-center text-[var(--text-secondary)]"
+        className="rounded-lg p-6 text-center text-(--text-secondary)"
         style={{ background: 'var(--surface-muted)' }}
       >
         No innings data
@@ -14,64 +15,69 @@ export default function InningsTable({ innings = [], highPressureThreshold = 1.5
 
   return (
     <div
-      className="rounded-[var(--radius-lg)] overflow-hidden dark-no-border"
+      className="rounded-lg overflow-hidden dark-no-border h-[400px] flex flex-col"
       style={{
         background: 'var(--surface-card)',
         boxShadow: 'var(--shadow-soft)',
         border: '1px solid rgba(58,110,165,0.2)',
       }}
     >
-      <div className="px-6 py-4 panel-header border-b border-[var(--muted)]/40">
+      <div className="px-6 py-4 panel-header border-b border-[var(--muted)]/40 shrink-0 shadow-sm z-20">
         <h3 className="font-display font-semibold text-[var(--text-primary)]" style={{ fontSize: 'var(--text-h3)' }}>
           Innings Breakdown (Last {innings.length})
         </h3>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm" role="grid" aria-label="Innings breakdown">
-          <thead>
-            <tr className="text-[var(--text-small)] text-[var(--text-secondary)] uppercase tracking-wider border-b border-[var(--muted)]/50">
-              <th className="px-4 py-3 text-left">Date</th>
-              <th className="px-3 py-3 text-center tabular-nums">Runs</th>
-              <th className="px-3 py-3 text-center tabular-nums">Balls</th>
-              <th className="px-3 py-3 text-center tabular-nums">Wkts</th>
-              <th className="px-3 py-3 text-center">Bat Perf</th>
-              <th className="px-3 py-3 text-center">Bowl Perf</th>
-              <th className="px-3 py-3 text-center">Context</th>
-              <th className="px-3 py-3 text-center">Pressure</th>
-              <th className="px-3 py-3 text-center">Raw</th>
-              <th className="px-3 py-3 text-center">IM</th>
-            </tr>
-          </thead>
-          <tbody>
-            {innings.map((inn, idx) => {
-              const isHighPressure = (inn.pressure_index || 0) >= highPressureThreshold;
-              return (
-                <tr
-                  key={idx}
-                  className="border-t border-[var(--muted)]/40 hover:bg-[var(--surface-muted)] transition-colors"
-                  style={{
-                    borderLeft: isHighPressure ? '6px solid var(--accent)' : undefined,
-                  }}
-                >
-                  <td className="px-4 py-2.5 text-[var(--text-secondary)] text-xs">
-                    {inn.date || '—'}
-                  </td>
-                  <td className="px-3 py-2.5 text-center tabular-nums text-[var(--accent)]">{inn.runs}</td>
-                  <td className="px-3 py-2.5 text-center tabular-nums text-[var(--text-primary)]">{inn.balls_faced}</td>
-                  <td className="px-3 py-2.5 text-center tabular-nums text-[var(--surface)]">{inn.wickets}</td>
-                  <td className="px-3 py-2.5 text-center font-mono text-[var(--text-primary)]">{inn.batting_performance}</td>
-                  <td className="px-3 py-2.5 text-center font-mono text-[var(--text-primary)]">{inn.bowling_performance}</td>
-                  <td className="px-3 py-2.5 text-center font-mono text-[var(--accent)]">{inn.context_weight}×</td>
-                  <td className="px-3 py-2.5 text-center font-mono text-[var(--accent-strong)]">{inn.pressure_index}×</td>
-                  <td className="px-3 py-2.5 text-center font-mono text-[var(--text-primary)]">{inn.raw_impact}</td>
-                  <td className="px-3 py-2.5 text-center font-mono font-bold text-[var(--accent-strong)]">
-                    {inn.impact_normalized_innings?.toFixed(1) ?? '—'}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      
+      {/* Header Row */}
+      <div className="flex items-center text-(--text-small) text-(--text-secondary) uppercase tracking-wider border-b border-[var(--muted)]/50 pb-2 pt-3 px-6 bg-[var(--surface-muted)] shrink-0 z-10 shadow-sm">
+        <div className="flex-1 text-left font-bold min-w-[80px]">Date</div>
+        <div className="w-12 text-center font-bold">Runs</div>
+        <div className="w-12 text-center font-bold">Balls</div>
+        <div className="w-12 text-center font-bold">Wkts</div>
+        <div className="w-20 text-center font-bold hidden md:block">Bat Perf</div>
+        <div className="w-20 text-center font-bold hidden md:block">Bowl Perf</div>
+        <div className="w-20 text-center font-bold">Context</div>
+        <div className="w-20 text-center font-bold">Pressure</div>
+        <div className="w-16 text-center font-bold hidden sm:block">Raw</div>
+        <div className="w-20 text-center font-bold">IM Score</div>
+      </div>
+
+      <div className="flex-1 w-full overflow-hidden">
+        <AnimatedList
+          items={innings}
+          showGradients={true}
+          enableArrowNavigation={true}
+          displayScrollbar={true}
+          listContainerClassName="px-4 py-2"
+          renderItem={(inn, idx, isSelected) => {
+            const isHighPressure = (inn.pressure_index || 0) >= highPressureThreshold;
+            return (
+              <div
+                className={`flex items-center px-2 py-3 mb-2 rounded-lg border border-[var(--muted)]/20 transition-all duration-300 ${
+                  isSelected ? 'ring-2 ring-[var(--accent)] bg-[var(--surface-muted)] scale-[1.01]' : 'bg-[var(--surface-card)] hover:bg-[var(--surface-muted)]'
+                }`}
+                style={{
+                  borderLeft: isHighPressure ? '4px solid var(--accent)' : '4px solid transparent',
+                }}
+              >
+                <div className="flex-1 text-(--text-secondary) text-xs min-w-[80px]">
+                  {inn.date || '—'}
+                </div>
+                <div className="w-12 text-center tabular-nums font-bold text-[var(--accent)]">{inn.runs}</div>
+                <div className="w-12 text-center tabular-nums text-[var(--text-primary)]">{inn.balls_faced}</div>
+                <div className="w-12 text-center tabular-nums text-[var(--surface)]">{inn.wickets}</div>
+                <div className="w-20 text-center font-mono text-[var(--text-primary)] hidden md:block opacity-80">{inn.batting_performance}</div>
+                <div className="w-20 text-center font-mono text-[var(--text-primary)] hidden md:block opacity-80">{inn.bowling_performance}</div>
+                <div className="w-20 text-center font-mono text-[var(--accent)]">{inn.context_weight}×</div>
+                <div className="w-20 text-center font-mono text-[var(--accent-strong)]">{inn.pressure_index}×</div>
+                <div className="w-16 text-center font-mono text-[var(--text-primary)] hidden sm:block opacity-70">{inn.raw_impact}</div>
+                <div className="w-20 text-center font-mono font-bold text-[var(--accent-strong)] drop-shadow-[0_0_8px_rgba(16,185,129,0.2)]">
+                  {inn.impact_normalized_innings?.toFixed(1) ?? '—'}
+                </div>
+              </div>
+            );
+          }}
+        />
       </div>
     </div>
   );

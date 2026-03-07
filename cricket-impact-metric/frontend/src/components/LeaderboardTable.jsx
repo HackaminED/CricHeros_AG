@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGender } from '../context/GenderContext';
 import CategoryBadge from './CategoryBadge';
+import AnimatedList from './AnimatedList';
 
 function RankCell({ index }) {
   if (index === 0) return <span aria-label="Gold">🥇</span>;
@@ -81,87 +82,105 @@ export default function LeaderboardTable({
         </select>
       </div>
 
-      {/* Table */}
+      {/* Table Replacement (Animated List) */}
       <div
-        className="rounded-[var(--radius-lg)] overflow-hidden dark-no-border"
-        style={{ boxShadow: 'var(--shadow-soft)', background: 'var(--surface-card)', border: '1px solid rgba(58,110,165,0.2)' }}
+        className="rounded-[var(--radius-lg)] overflow-hidden dark-no-border h-[800px] flex flex-col"
+        style={{ boxShadow: 'var(--shadow-soft)', background: 'var(--bg)', border: '1px solid rgba(58,110,165,0.2)', position: 'relative' }}
       >
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm" role="grid" aria-label="Leaderboard">
-            <thead>
-              <tr className="text-[var(--text-small)] text-[var(--text-secondary)] uppercase tracking-wider border-b border-[var(--muted)]/50">
-                <th className="px-4 py-4 text-center w-16">Rank</th>
-                <th className="px-6 py-4 text-left">Player</th>
-                <th className="px-4 py-4 text-left">Team</th>
-                <th className="px-4 py-4 text-center">IM Score</th>
-                <th className="px-4 py-4 text-center">Category</th>
-                <th className="px-4 py-4 text-right tabular-nums">Innings</th>
-                <th className="px-4 py-4 text-right tabular-nums">Runs</th>
-                <th className="px-4 py-4 text-right tabular-nums">Wickets</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((p, idx) => (
-                <tr
-                  key={p.player}
-                  onClick={() => handleRowClick(p)}
-                  className={`border-t border-[var(--muted)]/40 cursor-pointer transition-all duration-200 card-hover ${
-                    idx < 3 ? 'bg-[var(--surface-muted)]' : ''
-                  }`}
+        {/* Header Row */}
+        <div className="flex items-center text-[var(--text-small)] text-[var(--text-secondary)] uppercase tracking-wider border-b border-[var(--muted)]/50 pb-3 pt-4 px-6 bg-[var(--surface-muted)] shrink-0 z-20 shadow-md">
+          <div className="w-16 text-center font-bold">Rank</div>
+          <div className="flex-1 min-w-[150px] font-bold">Player</div>
+          <div className="w-24 text-left font-bold hidden sm:block">Team</div>
+          <div className="w-28 text-center font-bold">IM Score</div>
+          <div className="w-32 text-center font-bold hidden md:block">Category</div>
+          <div className="w-20 text-right font-bold hidden lg:block">Innings</div>
+          <div className="w-20 text-right font-bold hidden lg:block">Runs</div>
+          <div className="w-20 text-right font-bold hidden lg:block">Wickets</div>
+        </div>
+
+        {/* List Body */}
+        {data.length > 0 ? (
+          <div className="flex-1 w-full overflow-hidden">
+            <AnimatedList
+              items={data}
+              onItemSelect={handleRowClick}
+              showGradients={true}
+              enableArrowNavigation={true}
+              displayScrollbar={true}
+              listContainerClassName="px-4 py-2"
+              renderItem={(p, idx, isSelected) => (
+                <div
+                  className={`flex items-center px-2 py-4 rounded-xl border border-[var(--muted)]/20 cursor-pointer transition-all duration-300 card-hover mb-3 ${
+                    isSelected ? 'ring-2 ring-[var(--accent)] bg-[var(--surface-muted)] scale-[1.02]' : 'bg-[var(--surface-card)] hover:bg-[var(--surface-muted)]'
+                  } ${idx < 3 ? 'shadow-[0_4px_20px_rgba(16,185,129,0.1)]' : ''}`}
                   style={{
-                    padding: 'var(--space-3)',
-                    borderLeft: idx < 3 ? '4px solid var(--accent)' : undefined,
-                  }}
-                  tabIndex={0}
-                  role="button"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      handleRowClick(p);
-                    }
+                    borderLeft: idx < 3 ? '4px solid var(--accent)' : '4px solid transparent',
                   }}
                   aria-label={`${p.player}, rank ${idx + 1}, impact score ${p.impact_score?.toFixed(1)}`}
                 >
-                  <td className="px-4 py-3 text-center text-lg">
+                  {/* Rank */}
+                  <div className="w-16 text-center text-lg md:text-xl">
                     <RankCell index={idx} />
-                  </td>
-                  <td className="px-6 py-3 font-semibold text-[var(--text-primary)]">
-                    {p.player}{' '}
-                    <span className="opacity-70 text-xs ml-1" aria-hidden>
-                      {gender === 'Women' ? '♀' : '♂'}
+                  </div>
+                  
+                  {/* Player Name */}
+                  <div className="flex-1 min-w-[150px] font-semibold text-[var(--text-primary)] flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 overflow-hidden flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                      {p.player.substring(0, 2).toUpperCase()}
+                    </div>
+                    <span>
+                      {p.player}{' '}
+                      <span className="opacity-70 text-xs ml-1" aria-hidden>
+                        {gender === 'Women' ? '♀' : '♂'}
+                      </span>
                     </span>
-                  </td>
-                  <td className="px-4 py-3 text-[var(--text-secondary)] text-xs">
+                  </div>
+
+                  {/* Team */}
+                  <div className="w-24 text-left text-[var(--text-secondary)] text-xs hidden sm:block truncate pr-2">
                     {p.team}
-                  </td>
-                  <td className="px-4 py-3 text-center">
+                  </div>
+
+                  {/* IM Score (Highlight) */}
+                  <div className="w-28 text-center">
                     <span
-                      className="font-display font-bold tabular-nums"
-                      style={{ fontSize: '36px', color: 'var(--accent-strong)' }}
+                      className="font-display font-bold tabular-nums px-3 py-1 bg-black/20 rounded-lg drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]"
+                      style={{ fontSize: '24px', color: 'var(--accent-strong)' }}
                     >
                       {p.impact_score?.toFixed(1)}
                     </span>
-                  </td>
-                  <td className="px-4 py-3 text-center">
+                  </div>
+
+                  {/* Category Badge */}
+                  <div className="w-32 text-center hidden md:block">
                     <CategoryBadge category={p.category} />
-                  </td>
-                  <td className="px-4 py-3 text-right font-mono tabular-nums text-[var(--text-primary)]">
+                  </div>
+
+                  {/* Innings */}
+                  <div className="w-20 text-right font-mono tabular-nums text-[var(--text-primary)] hidden lg:block opacity-80">
                     {p.total_innings}
-                  </td>
-                  <td className="px-4 py-3 text-right font-mono tabular-nums text-[var(--accent-strong)]">
+                  </div>
+
+                  {/* Runs */}
+                  <div className="w-20 text-right font-mono tabular-nums text-[var(--accent-strong)] hidden lg:block font-medium">
                     {p.total_runs}
-                  </td>
-                  <td className="px-4 py-3 text-right font-mono tabular-nums text-[var(--surface)]">
+                  </div>
+
+                  {/* Wickets */}
+                  <div className="w-20 text-right font-mono tabular-nums text-[var(--surface)] hidden lg:block opacity-90">
                     {p.total_wickets}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {data.length === 0 && (
-          <div className="p-8 text-center text-[var(--text-secondary)]" role="status">
-            No players found with the current filters
+                  </div>
+                </div>
+              )}
+            />
+          </div>
+        ) : (
+          <div className="flex-1 flex items-center justify-center p-8 text-center text-[var(--text-secondary)]" role="status">
+            <div className="flex flex-col items-center gap-4">
+              <span className="text-4xl">🏏</span>
+              <p>No players found with the current filters</p>
+            </div>
           </div>
         )}
       </div>
