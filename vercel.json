@@ -1,4 +1,17 @@
 {
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "75mb"
+      }
+    },
+    {
+      "src": "package.json",
+      "use": "@vercel/vite"
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
