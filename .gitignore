@@ -1,44 +1,26 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Data files (download via scripts/download_cricsheet_data.py)
+data/
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
 
-# testing
-/coverage
+# ML artifacts
+# *.pkl (Allowed for Vercel Serverless injection)
+*.joblib
 
-# next.js
-/.next/
-/out/
+# Database
+# *.db (Allowed for Vercel Serverless injection)
 
-# production
-/build
+# Node
+node_modules/
+.vite/
 
-# misc
+# OS
 .DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# Original video file (duplicate of public/intro.mp4)
-WhatsApp Video*
+Thumbs.db

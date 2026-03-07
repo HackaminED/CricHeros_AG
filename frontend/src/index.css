@@ -1,0 +1,106 @@
+@import './styles/tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Dashboard canvas: gradient mesh background (only for app, not landing) */
+.dashboard-canvas {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+.dashboard-canvas::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 0%, var(--accent-glow) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 90% 80%, rgba(56, 189, 248, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 30% at 50% 50%, rgba(249, 115, 22, 0.04) 0%, transparent 45%);
+}
+[data-theme="dark"] .dashboard-canvas::before {
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 0%, var(--accent-glow) 0%, transparent 45%),
+    radial-gradient(ellipse 60% 40% at 90% 80%, rgba(56, 189, 248, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 30% at 50% 50%, rgba(249, 115, 22, 0.03) 0%, transparent 45%);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: var(--radius-pill);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--surface);
+}
+
+[data-focus-ring]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Card hover: lift + glow */
+.card-hover {
+  transition: transform var(--duration-normal) var(--ease-spring), box-shadow var(--duration-normal) ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-strong);
+}
+
+/* Page enter animation */
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-page-enter {
+  animation: pageEnter 0.5s var(--ease-out-expo) forwards;
+}
+
+/* Stagger children */
+.stagger-children > * {
+  animation: pageEnter 0.5s var(--ease-out-expo) forwards;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; opacity: 0; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; opacity: 0; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; opacity: 0; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; opacity: 0; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; opacity: 0; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.3s; opacity: 0; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.35s; opacity: 0; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.4s; opacity: 0; }
+.stagger-children > *:nth-child(9) { animation-delay: 0.45s; opacity: 0; }
+.stagger-children > *:nth-child(n+10) { animation-delay: 0.5s; opacity: 0; }
+
+/* Min innings dropdown: dark text on light background for readability */
+select option {
+  color: #111;
+  background: #fff;
+}
+
+.impact-low { color: #dc2626; }
+.impact-mid { color: #d97706; }
+.impact-high { color: #059669; }
+.impact-elite { color: var(--accent-strong); }
