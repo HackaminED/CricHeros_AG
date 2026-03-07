@@ -21,13 +21,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register routes
-app.include_router(players.router)
-app.include_router(impact.router)
-app.include_router(matches.router)
+# Register routes under /api prefix for Vercel Serverless compatibility
+app.include_router(players.router, prefix="/api")
+app.include_router(impact.router, prefix="/api")
+app.include_router(matches.router, prefix="/api")
 
-
-@app.get("/")
+@app.get("/api")
 def root():
     return {
         "name": "Cricket Impact Metric API",

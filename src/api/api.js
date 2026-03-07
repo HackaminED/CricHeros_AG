@@ -1,0 +1,90 @@
+import axios from 'axios';
+
+// Automatically distinct between local dev and Vercel Production
+const isProd = import.meta.env.PROD || window.location.hostname !== 'localhost';
+const API_URL = isProd ? '/api' : 'http://localhost:8000/api';
+
+const api = axios.create({
+    baseURL: API_URL,
+    timeout: 30000,
+});
+
+// Players
+export const getPlayers = async (search = '', limit = 100, gender = 'Men') => {
+    if (search) {
+        const response = await api.get('/players/search', { params: { q: search, limit, gender } });
+        return response.data;
+    }
+    const params = { limit, gender };
+    const response = await api.get('/players', { params });
+    return response.data;
+};
+
+export const getPlayerImpact = async (playerName, lastN = 10, gender = 'Men') => {
+    const response = await api.get(`/players/${encodeURIComponent(playerName)}/impact`, {
+        params: { last_n: lastN, gender }
+    });
+    return response.data;
+};
+
+export const getPlayerTrend = async (playerName, lastN = 10, gender = 'Men') => {
+    const response = await api.get(`/players/${encodeURIComponent(playerName)}/trend`, {
+        params: { last_n: lastN, gender }
+    });
+    return response.data;
+};
+
+// Leaderboard
+export const getLeaderboard = async (limit = 50, minInnings = 10, role = null, teams = null, gender = 'Men') => {
+    const params = { limit, min_innings: minInnings, gender };
+    if (role) params.role = role;
+    if (teams) params.teams = teams;
+    const response = await api.get('/leaderboard', { params });
+    return response.data;
+};
+
+// Matches
+export const getMatches = async (limit = 50, team = null, gender = 'Men') => {
+    const params = { limit, gender };
+    if (team) params.team = team;
+    const response = await api.get('/matches', { params });
+    return response.data;
+};
+
+export const getMatch = (matchId) =>
+    api.get(`/matches/${matchId}`).then(r => r.data);
+
+// Match WPA (Match Swing timeline + per-player aggregates)
+export const getMatchWpa = (matchId, gender = 'Men') =>
+    api.get(`/matches/${matchId}/wpa`, { params: { gender } }).then(r => r.data);
+
+// Player WPA (Clutch Impact across last N matches)
+export const getPlayerWpa = (playerName, lastN = 10, gender = 'Men') =>
+    api.get(`/players/${encodeURIComponent(playerName)}/wpa`, { params: { last_n: lastN, gender } }).then(r => r.data);
+
+export const getLeaderboardClutch = (gender = 'Men', minMatches = 5, topK = 100) =>
+    api.get('/leaderboard/clutch', { params: { gender, min_matches: minMatches, top_k: topK } }).then(r => r.data);
+
+// Player CIS (Counterfactual Impact Score / Choke Index)
+export const getPlayerCis = (playerName, lastN = 10, gender = 'Men') =>
+    api.get(`/players/${encodeURIComponent(playerName)}/cis`, { params: { last_n: lastN, gender } }).then(r => r.data);
+
+// Stats
+export const getStats = () =>
+    api.get('/stats').then(r => r.data);
+
+// Match Predictor API
+export const getMatchPredictionOptions = () =>
+    api.get('/matches/predict/options').then(r => r.data);
+
+export const predictMatch = (team1, team2, venue, tossWinner, tossDecision, gender = 'Men') =>
+    api.post('/matches/predict', {
+        team1,
+        team2,
+        venue,
+        toss_winner: tossWinner,
+        toss_decision: tossDecision,
+        gender
+    }).then(r => r.data);
+
+export default api;
