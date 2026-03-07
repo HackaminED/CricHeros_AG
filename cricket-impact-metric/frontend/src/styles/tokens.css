@@ -1,0 +1,96 @@
+/**
+ * Cricket Impact — Neo-Brutalist Design Tokens
+ * 60/30/10: --bg (60%), --surface (30%), --accent (10%)
+ * No hard corners: use --radius-* everywhere.
+ */
+
+:root {
+  /* === Color (60/30/10) === */
+  --bg: #EBEBEB;
+  --surface: #3A6EA5;
+  --accent: #FF6700;
+  --accent-strong: #004E98;
+  --muted: #C0C0C0;
+  --text-primary: #0B1931;
+  --text-secondary: #334e70;
+
+  /* Surface variants (layering) */
+  --surface-muted: rgba(58, 110, 165, 0.12);
+  --surface-card: rgba(58, 110, 165, 0.18);
+  --surface-panel: rgba(58, 110, 165, 0.08);
+
+  /* === Radii (no hard corners) === */
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 28px;
+  --radius-pill: 999px;
+
+  /* === Shadows (tactile, neo-brutal) === */
+  --shadow-soft: 0 6px 8px rgba(58, 110, 165, 0.12), inset 0 -6px 12px rgba(0, 78, 152, 0.06);
+  --shadow-strong: 0 8px 18px rgba(0, 78, 152, 0.18), inset 0 -10px 18px rgba(58, 110, 165, 0.07);
+  --shadow-focus: 0 0 0 3px rgba(0, 78, 152, 0.25);
+
+  /* === Spacing === */
+  --grid-gap: 24px;
+  --space-1: 8px;
+  --space-2: 12px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+
+  /* === Typography === */
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Sora", "Poppins", "Inter", sans-serif;
+
+  --text-h1: 36px;
+  --text-h1-lh: 48px;
+  --text-h2: 28px;
+  --text-h2-lh: 36px;
+  --text-h3: 20px;
+  --text-h3-lh: 28px;
+  --text-body: 16px;
+  --text-body-lh: 24px;
+  --text-small: 12px;
+  --text-small-lh: 16px;
+  --text-stat: 36px;
+  --text-stat-lg: 48px;
+}
+
+/* Dark theme variant (theme switch) */
+[data-theme="dark"] {
+  --bg: #0B1931;
+  --surface: #3A6EA5;
+  --accent: #FF6700;
+  --accent-strong: #5B9BD5;
+  --muted: #5a6b7d;
+  --text-primary: #EBEBEB;
+  --text-secondary: #a8b8c8;
+  --surface-muted: rgba(58, 110, 165, 0.2);
+  --surface-card: rgba(58, 110, 165, 0.25);
+  --surface-panel: rgba(58, 110, 165, 0.15);
+  --shadow-soft: 0 6px 8px rgba(0, 0, 0, 0.2), inset 0 -6px 12px rgba(0, 78, 152, 0.1);
+  --shadow-strong: 0 8px 18px rgba(0, 0, 0, 0.3), inset 0 -10px 18px rgba(58, 110, 165, 0.12);
+}
+
+/* Base application */
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--text-body-lh);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Focus ring for accessibility */
+.focus-ring:focus-visible,
+[data-focus-ring]:focus-visible {
+  outline: 2px solid rgba(0, 78, 152, 0.5);
+  outline-offset: 3px;
+}
+
+/* Tabular figures for numeric columns */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}

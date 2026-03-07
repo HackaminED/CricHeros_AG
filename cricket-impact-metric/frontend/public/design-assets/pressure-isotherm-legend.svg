@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="140" viewBox="0 0 160 140" aria-hidden="true">
+  <title>Pressure Isotherm legend and sample grid</title>
+  <defs>
+    <linearGradient id="bin1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#004E98" stop-opacity="0.15"/><stop offset="100%" stop-color="#004E98" stop-opacity="0.15"/></linearGradient>
+    <linearGradient id="bin2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#004E98" stop-opacity="0.35"/></linearGradient>
+    <linearGradient id="bin3" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#004E98" stop-opacity="0.55"/></linearGradient>
+    <linearGradient id="bin4" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#004E98" stop-opacity="0.75"/></linearGradient>
+    <linearGradient id="bin5" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#004E98" stop-opacity="0.95"/></linearGradient>
+  </defs>
+  <!-- Sample 4x4 blocky grid -->
+  <rect x="10" y="10" width="24" height="24" rx="6" fill="rgba(0,78,152,0.15)" stroke="rgba(0,78,152,0.3)"/>
+  <rect x="38" y="10" width="24" height="24" rx="6" fill="rgba(0,78,152,0.35)" stroke="rgba(0,78,152,0.3)"/>
+  <rect x="66" y="10" width="24" height="24" rx="6" fill="rgba(0,78,152,0.55)" stroke="rgba(0,78,152,0.3)"/>
+  <rect x="94" y="10" width="24" height="24" rx="6" fill="rgba(0,78,152,0.95)" stroke="rgba(0,78,152,0.3)"/>
+  <rect x="10" y="38" width="24" height="24" rx="6" fill="rgba(0,78,152,0.35)" stroke="rgba(0,78,152,0.3)"/>
+  <rect x="38" y="38" width="24" height="24" rx="6" fill="rgba(0,78,152,0.55)" stroke="rgba(0,78,152,0.3)"/>
+  <rect x="66" y="38" width="24" height="24" rx="6" fill="rgba(0,78,152,0.75)" stroke="rgba(0,78,152,0.3)"/>
+  <rect x="94" y="38" width="24" height="24" rx="6" fill="rgba(0,78,152,0.75)" stroke="rgba(0,78,152,0.3)"/>
+  <!-- Legend -->
+  <text x="10" y="88" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#0B1931">Pressure bins</text>
+  <rect x="10" y="96" width="16" height="16" rx="4" fill="rgba(0,78,152,0.15)" stroke="rgba(0,78,152,0.4)"/>
+  <text x="32" y="108" font-size="10" fill="#334e70">0.0  0.2</text>
+  <rect x="10" y="116" width="16" height="16" rx="4" fill="rgba(0,78,152,0.55)" stroke="rgba(0,78,152,0.4)"/>
+  <text x="32" y="128" font-size="10" fill="#334e70">0.2  0.4</text>
+</svg>

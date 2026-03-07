@@ -9,7 +9,11 @@ const api = axios.create({
 
 // Players
 export const getPlayers = async (search = '', limit = 100, gender = 'Men') => {
-    const params = { search, limit, gender };
+    if (search) {
+        const response = await api.get('/players/search', { params: { q: search, limit, gender } });
+        return response.data;
+    }
+    const params = { limit, gender };
     const response = await api.get('/players', { params });
     return response.data;
 };

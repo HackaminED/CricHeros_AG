@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" aria-hidden="true">
+  <defs>
+    <filter id="inner-shadow">
+      <feOffset dx="0" dy="2"/>
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feFlood flood-color="#004E98" flood-opacity="0.15"/>
+      <feComposite in2="blur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- Background ring -->
+  <circle cx="100" cy="100" r="45" fill="none" stroke="#C0C0C0" stroke-width="18" stroke-opacity="0.5"/>
+  <!-- Progress ring (78% = dashoffset ~62) -->
+  <circle cx="100" cy="100" r="45" fill="none" stroke="#004E98" stroke-width="18" stroke-linecap="round"
+    stroke-dasharray="282.74" stroke-dashoffset="62" transform="rotate(-90 100 100)" filter="url(#inner-shadow)"/>
+  <!-- Optional orange rim for score e80 (shown as example) -->
+  <circle cx="100" cy="100" r="36" fill="none" stroke="#FF6700" stroke-width="2" stroke-opacity="0.5"
+    stroke-dasharray="226.19" stroke-dashoffset="50" transform="rotate(-90 100 100)"/>
+  <!-- Center number -->
+  <text x="100" y="108" text-anchor="middle" font-family="Sora, Inter, sans-serif" font-size="48" font-weight="800" fill="#004E98">78</text>
+</svg>

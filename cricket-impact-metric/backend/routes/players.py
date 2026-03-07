@@ -39,6 +39,38 @@ def get_players(
     rows = query_all(query, tuple(params))
     return {"players": rows, "count": len(rows)}
 
+@router.get("/search")
+def search_players(
+    q: str = Query(..., min_length=1),
+    gender: str = "Men"
+):
+    """
+    Search players by name with case-insensitive substring matching.
+    Results are ranked: exact prefix match first, then word match, then substring match.
+    """
+    query = """
+        SELECT DISTINCT player, team, gender, impact_score
+        FROM player_scores
+        WHERE LOWER(player) LIKE ?
+        AND gender = ?
+        ORDER BY
+            CASE
+                WHEN LOWER(player) LIKE ? THEN 1
+                WHEN LOWER(player) LIKE ? THEN 2
+                ELSE 3
+            END,
+            player
+        LIMIT 20
+    """
+    
+    # query prep
+    like_q = f"%{q.lower()}%"
+    prefix_q = f"{q.lower()}%"
+    word_q = f"% {q.lower()}%"
+    
+    params = (like_q, gender, prefix_q, word_q)
+    rows = query_all(query, params)
+    return {"players": rows, "count": len(rows)}
 
 @router.get("/{name}/impact")
 def get_player_impact(
