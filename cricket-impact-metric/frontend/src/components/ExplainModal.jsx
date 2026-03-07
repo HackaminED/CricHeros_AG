@@ -20,17 +20,16 @@ export default function ExplainModal({ isOpen, onClose, explain, lastNInnings = 
       aria-modal="true"
       aria-labelledby="explain-modal-title"
     >
-      <div className="absolute inset-0 bg-[var(--text-primary)]/40" aria-hidden />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" aria-hidden />
       <div
-        className="relative rounded-[var(--radius-lg)] max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-strong animate-fade-in focus:outline-none dark-no-border border border-[var(--muted)]/50"
-        style={{ background: 'var(--bg)' }}
+        className="relative rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto focus:outline-none dark-no-border animate-page-enter"
+        style={{ background: 'var(--surface-card)', boxShadow: 'var(--shadow-strong)', border: '1px solid var(--glass-border)' }}
         onClick={(e) => e.stopPropagation()}
         tabIndex={-1}
       >
-        {/* Header bar */}
         <div
-          className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 panel-header border-b border-[var(--muted)]/40"
-          style={{ background: 'var(--surface)', color: 'white' }}
+          className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 dark-no-border"
+          style={{ background: 'var(--accent)', color: 'white', boxShadow: '0 4px 20px var(--accent-glow)' }}
         >
           <h2 id="explain-modal-title" className="font-display font-bold text-lg">
             How Impact Score is Calculated
@@ -38,7 +37,7 @@ export default function ExplainModal({ isOpen, onClose, explain, lastNInnings = 
           <button
             type="button"
             onClick={onClose}
-            className="w-10 h-10 rounded-[var(--radius-md)] flex items-center justify-center text-white hover:bg-white/20 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-white hover:bg-white/20 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
             aria-label="Close modal"
           >
             ✕
@@ -48,8 +47,8 @@ export default function ExplainModal({ isOpen, onClose, explain, lastNInnings = 
         <div className="p-6 space-y-5">
           {/* Formula */}
           <div
-            className="rounded-[var(--radius-md)] p-4"
-            style={{ background: 'var(--surface-muted)', border: '1px solid rgba(58,110,165,0.2)' }}
+            className="rounded-xl p-4"
+            style={{ background: 'var(--surface-muted)', border: '1px solid var(--glass-border)' }}
           >
             <p className="font-mono font-semibold text-[var(--accent-strong)] text-sm mb-2">
               Impact = Performance × Context × Pressure

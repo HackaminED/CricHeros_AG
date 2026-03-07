@@ -46,7 +46,6 @@ export default function PlayerSearch({ onSelect }) {
         setIsOpen(true);
         setSelectedIndex(-1);
       } catch (err) {
-        console.error('Search failed:', err);
         setResults([]);
       } finally {
         setLoading(false);
@@ -58,7 +57,6 @@ export default function PlayerSearch({ onSelect }) {
 
   const handleKeyDown = (e) => {
     if (!isOpen || results.length === 0) return;
-
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setSelectedIndex((i) => Math.min(i + 1, results.length - 1));
@@ -79,11 +77,17 @@ export default function PlayerSearch({ onSelect }) {
     onSelect?.(player);
   };
 
-  const getScoreColor = () => 'var(--accent-strong)';
-
   return (
     <div ref={containerRef} className="relative w-full max-w-md">
-      <div className="relative">
+      <div
+        className="relative rounded-2xl transition-all duration-200 focus-within:ring-2 focus-within:ring-[var(--accent)] focus-within:ring-offset-2 focus-within:ring-offset-[var(--bg)]"
+        style={{
+          background: 'var(--glass)',
+          backdropFilter: 'blur(12px)',
+          boxShadow: 'var(--shadow-soft)',
+          border: '1px solid var(--glass-border)',
+        }}
+      >
         <svg
           className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-secondary)]"
           fill="none"
@@ -101,13 +105,7 @@ export default function PlayerSearch({ onSelect }) {
           onKeyDown={handleKeyDown}
           onFocus={() => results.length > 0 && setIsOpen(true)}
           placeholder="Search players…"
-          className="player-search-input w-full pl-11 pr-4 py-3 rounded-[var(--radius-lg)] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[rgba(0,78,152,0.5)] transition-all"
-          style={{
-            background: theme === 'dark' ? 'var(--surface-muted)' : '#fff',
-            boxShadow: 'var(--shadow-soft)',
-            border: theme === 'dark' ? 'none' : '1px solid var(--muted)',
-            color: 'var(--input-text)',
-          }}
+          className="player-search-input w-full pl-12 pr-12 py-3.5 rounded-2xl bg-transparent border-0 focus:outline-none text-[var(--input-text)] placeholder-[var(--input-placeholder)]"
           id="player-search-input"
           aria-label="Search players"
           aria-autocomplete="list"
@@ -117,9 +115,7 @@ export default function PlayerSearch({ onSelect }) {
         />
         {loading && (
           <div className="absolute right-4 top-1/2 -translate-y-1/2" aria-hidden>
-            <div
-              className="w-4 h-4 border-2 border-[var(--accent-strong)] border-t-transparent rounded-full animate-spin"
-            />
+            <div className="w-5 h-5 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
           </div>
         )}
       </div>
@@ -127,8 +123,12 @@ export default function PlayerSearch({ onSelect }) {
       {isOpen && results.length > 0 && (
         <ul
           id="search-suggestions"
-          className="absolute top-full mt-2 w-full rounded-[var(--radius-lg)] overflow-hidden z-50 shadow-strong dark-no-border border border-[var(--muted)]/50"
-          style={{ background: 'var(--bg)' }}
+          className="absolute top-full mt-2 w-full rounded-2xl overflow-hidden z-50 py-1 dark-no-border"
+          style={{
+            background: 'var(--surface-card)',
+            boxShadow: 'var(--shadow-strong)',
+            border: '1px solid var(--glass-border)',
+          }}
           role="listbox"
         >
           {results.map((player, idx) => (
@@ -136,16 +136,16 @@ export default function PlayerSearch({ onSelect }) {
               <button
                 type="button"
                 onClick={() => handleSelect(player)}
-                className={`w-full px-4 py-3 flex items-center justify-between text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-[rgba(0,78,152,0.5)] ${
+                className={`w-full px-4 py-3 flex items-center justify-between text-left transition-colors rounded-xl mx-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
                   idx === selectedIndex ? 'bg-[var(--surface-muted)]' : 'hover:bg-[var(--surface-muted)]'
                 }`}
                 style={{ color: 'var(--text-primary)' }}
               >
                 <div>
-                  <p className="text-sm font-medium">{player.player}</p>
+                  <p className="font-semibold text-sm">{player.player}</p>
                   <p className="text-xs text-[var(--text-secondary)]">{player.team}</p>
                 </div>
-                <span className="font-mono font-semibold text-sm tabular-nums" style={{ color: getScoreColor() }}>
+                <span className="font-display font-bold text-sm tabular-nums" style={{ color: 'var(--accent-strong)' }}>
                   {player.impact_score?.toFixed(1)}
                 </span>
               </button>

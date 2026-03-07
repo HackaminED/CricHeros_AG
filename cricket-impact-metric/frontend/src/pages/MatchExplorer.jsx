@@ -47,15 +47,14 @@ export default function MatchExplorer() {
 
   if (!matchId) {
     return (
-      <div className="space-y-6 animate-fade-in">
-        <header>
-          <h1
-            className="font-display font-bold text-[var(--text-primary)]"
-            style={{ fontSize: 'var(--text-h1)', lineHeight: 'var(--text-h1-lh)' }}
-          >
+      <div className="animate-page-enter">
+        <header className="mb-10">
+          <h1 className="font-display font-bold text-[var(--text-primary)] text-3xl md:text-4xl tracking-tight">
             {gender}'s Match Explorer
           </h1>
-          <p className="text-[var(--text-secondary)] mt-1">Browse recent matches and see impact breakdowns</p>
+          <p className="text-[var(--text-secondary)] mt-1.5 text-base">
+            Browse recent matches and see impact breakdowns
+          </p>
         </header>
         <MatchList matches={matches} loading={loading} winnerTeamLabel />
       </div>
