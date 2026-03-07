@@ -3,14 +3,14 @@ players.py — Player-related API routes.
 """
 
 from fastapi import APIRouter, HTTPException, Query
-from backend.services.wpa_service import get_player_wpa
-from backend.services.cis_engine import get_player_cis
-from backend.database.db import query_all, query_one
-from backend.services.impact_engine import get_player_impact_data, ALLOWED_TEAMS
-from backend.services.rolling_impact import get_player_rolling_trend, get_player_career_stats
-from backend.services.wpa_service import get_player_wpa
-from backend.services.cis_engine import get_player_cis
-from backend.services.prediction_service import (
+from api._backend.services.wpa_service import get_player_wpa
+from api._backend.services.cis_engine import get_player_cis
+from api._backend.database.db import query_all, query_one
+from api._backend.services.impact_engine import get_player_impact_data, ALLOWED_TEAMS
+from api._backend.services.rolling_impact import get_player_rolling_trend, get_player_career_stats
+from api._backend.services.wpa_service import get_player_wpa
+from api._backend.services.cis_engine import get_player_cis
+from api._backend.services.prediction_service import (
     predict_impact_vs_opponent,
     predict_impact_vs_opponent_at_venue,
     predict_matchup,
@@ -104,7 +104,7 @@ def get_player_impact(
     career = get_player_career_stats(name)
 
     # Quick normalization: use the leaderboard context
-    from backend.services.impact_engine import get_leaderboard_data
+    from api._backend.services.impact_engine import get_leaderboard_data
     lb = get_leaderboard_data(min_innings=1, top_k=9999, last_n=last_n, gender=gender)
     if lb:
         all_weighted = [p["impact_weighted"] for p in lb]
@@ -115,7 +115,7 @@ def get_player_impact(
     else:
         data["impact_normalized"] = 50.0
 
-    from backend.services.impact_engine import _categorize
+    from api._backend.services.impact_engine import _categorize
     data["category"] = _categorize(data["impact_normalized"])
 
     # Normalize per-innings scores too

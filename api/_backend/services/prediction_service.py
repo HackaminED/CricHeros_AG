@@ -8,8 +8,8 @@ prediction_service.py — Impact predictions by opponent, venue, and matchup typ
 
 from math import exp
 import numpy as np
-from backend.database.db import query_all
-from backend.services.impact_engine import (
+from api._backend.database.db import query_all
+from api._backend.services.impact_engine import (
     ALLOWED_TEAMS,
     _compute_innings_impact,
     RECENCY_LAMBDA,
@@ -220,7 +220,7 @@ def predict_matchup(
 
     Without delivery-level data, uses player's overall impact and a heuristic modifier.
     """
-    from backend.services.impact_engine import get_player_impact_data
+    from api._backend.services.impact_engine import get_player_impact_data
 
     data = get_player_impact_data(player_name, last_n=last_n, gender=gender)
     if not data:

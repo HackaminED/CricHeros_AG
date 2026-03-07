@@ -6,8 +6,8 @@ as ball-aggregated WPA. Serves per-match and per-player swing aggregates
 and a synthetic timeline for charting when ball-by-ball is not available.
 """
 
-from backend.database.db import query_all, query_one
-from backend.services.impact_engine import ALLOWED_TEAMS
+from api._backend.database.db import query_all, query_one
+from api._backend.services.impact_engine import ALLOWED_TEAMS
 
 
 def _get_placeholders():

@@ -3,7 +3,7 @@ rolling_impact.py — Service for computing rolling impact metrics.
 """
 
 import numpy as np
-from backend.database.db import query_all
+from api._backend.database.db import query_all
 
 
 def get_player_rolling_trend(player_name: str, window: int = 10) -> list[dict]:

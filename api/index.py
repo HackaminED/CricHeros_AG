@@ -1,12 +1,9 @@
 import sys
 import os
 
-# Add root directory to python path so 'backend' is visible
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.routes import players, impact, matches
+from api._backend.routes import players, impact, matches
 
 # Vercel's @vercel/python requires EXPLICIT instantiation of FastAPI() the entrypoint file.
 app = FastAPI(

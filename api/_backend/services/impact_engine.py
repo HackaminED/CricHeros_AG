@@ -11,7 +11,7 @@ Recency-weighted over last N innings, normalized 0-100.
 
 import numpy as np
 from math import exp
-from backend.database.db import query_all
+from api._backend.database.db import query_all
 
 # ---------------------------------------------------------------------------
 # Constants

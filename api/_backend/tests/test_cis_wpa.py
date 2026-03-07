@@ -4,14 +4,14 @@ Run from repo root: python -m pytest backend/tests/test_cis_wpa.py -v
 """
 
 import pytest
-from backend.services.cis_engine import (
+from api._backend.services.cis_engine import (
     compute_global_baseline,
     compute_cis_for_innings,
     get_player_cis,
     get_cis_leaderboard,
     get_clutch_leaderboard,
 )
-from backend.services.wpa_service import get_match_wpa, get_player_wpa
+from api._backend.services.wpa_service import get_match_wpa, get_player_wpa
 
 
 def test_compute_cis_for_innings_baseline_match():

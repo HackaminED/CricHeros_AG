@@ -4,7 +4,7 @@ app.py — FastAPI application entry point.
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.routes import players, impact, matches
+from api._backend.routes import players, impact, matches
 
 app = FastAPI(
     title="Cricket Impact Metric API",

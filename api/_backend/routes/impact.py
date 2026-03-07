@@ -3,11 +3,11 @@ impact.py — Leaderboard and impact-related routes.
 """
 
 from fastapi import APIRouter, Query
-from backend.database.db import query_all
-from backend.services.impact_engine import (
+from api._backend.database.db import query_all
+from api._backend.services.impact_engine import (
     get_leaderboard_data, ALLOWED_TEAMS, MIN_INNINGS_LEADERBOARD,
 )
-from backend.services.cis_engine import get_cis_leaderboard, get_clutch_leaderboard
+from api._backend.services.cis_engine import get_cis_leaderboard, get_clutch_leaderboard
 
 router = APIRouter(tags=["impact"])
 

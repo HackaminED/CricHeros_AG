@@ -8,8 +8,8 @@ Choke Index = avg_CIS_high_pressure / avg_CIS_low_pressure.
 
 import numpy as np
 from math import exp
-from backend.database.db import query_all
-from backend.services.impact_engine import (
+from api._backend.database.db import query_all
+from api._backend.services.impact_engine import (
     get_player_impact_data,
     ALLOWED_TEAMS,
     RECENCY_LAMBDA,

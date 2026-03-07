@@ -2,8 +2,8 @@
 win_probability_model.py — Service wrapper for win probability predictions.
 """
 
-from backend.services.impact_calculator import predict_win_probability
-from backend.services.feature_engineering import build_game_state
+from api._backend.services.impact_calculator import predict_win_probability
+from api._backend.services.feature_engineering import build_game_state
 
 
 def get_win_probability(
