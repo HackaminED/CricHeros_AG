@@ -328,6 +328,39 @@ export default function PlayerDashboard() {
             </div>
           </motion.section>
 
+          {/* Matchup Predictions */}
+          {playerData.matchup_predictions && (
+            <motion.section variants={item}>
+              <h3 className="font-display font-bold text-[var(--text-primary)] text-xl mb-4">Matchup Predictions</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <StatCard
+                  label="Batting vs Pace"
+                  value={playerData.matchup_predictions.batting.vs_pace}
+                  colorClass="text-[var(--accent)]"
+                  sub="Predicted Impact Index"
+                />
+                <StatCard
+                  label="Batting vs Spin"
+                  value={playerData.matchup_predictions.batting.vs_spin}
+                  colorClass="text-[var(--accent)]"
+                  sub="Predicted Impact Index"
+                />
+                <StatCard
+                  label="Bowling vs LHB"
+                  value={playerData.matchup_predictions.bowling.vs_lhb}
+                  colorClass="text-[var(--text-primary)]"
+                  sub="Predicted Impact Index"
+                />
+                <StatCard
+                  label="Bowling vs RHB"
+                  value={playerData.matchup_predictions.bowling.vs_rhb}
+                  colorClass="text-[var(--text-primary)]"
+                  sub="Predicted Impact Index"
+                />
+              </div>
+            </motion.section>
+          )}
+
           {/* Recent Match Trend */}
           <motion.section variants={item}>
             <h3 className="font-display font-bold text-[var(--text-primary)] text-xl mb-4">Recent Match Trend</h3>
