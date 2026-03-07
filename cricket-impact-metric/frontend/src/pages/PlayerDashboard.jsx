@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import ImpactGauge from '../components/ImpactGauge';
 import ImpactTrendChart from '../components/ImpactTrendChart';
 import PlayerSearch from '../components/PlayerSearch';
 import ExplainModal from '../components/ExplainModal';
+import StatInfoModal from '../components/StatInfoModal';
 import InningsTable from '../components/InningsTable';
 import CategoryBadge from '../components/CategoryBadge';
 import { getPlayerImpact, getPlayerTrend, getPlayerWpa } from '../api/api';
@@ -12,7 +13,7 @@ import { useGender } from '../context/GenderContext';
 
 const SECTION_GAP = 40;
 
-function StatCard({ label, value, sub, colorClass = 'text-[var(--accent-strong)]', info, className = '' }) {
+function StatCard({ label, value, sub, colorClass = 'text-[var(--accent-strong)]', info, onInfoClick, className = '' }) {
   return (
     <motion.div
       layout
@@ -31,12 +32,14 @@ function StatCard({ label, value, sub, colorClass = 'text-[var(--accent-strong)]
       <p className={`text-2xl font-display font-bold tabular-nums ${colorClass}`}>{value ?? '—'}</p>
       {sub && <p className="text-xs text-[var(--text-secondary)] mt-1.5">{sub}</p>}
       {info && (
-        <span
-          className="absolute top-3 right-3 text-[var(--text-secondary)] text-xs cursor-help opacity-60 hover:opacity-100 transition-opacity"
-          title={info}
+        <button
+          type="button"
+          onClick={() => onInfoClick?.(label, info)}
+          className="absolute top-3 right-3 w-6 h-6 rounded-lg flex items-center justify-center text-[var(--text-secondary)] text-xs opacity-60 hover:opacity-100 hover:bg-[var(--surface-muted)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+          aria-label={`Info about ${label}`}
         >
           ℹ
-        </span>
+        </button>
       )}
     </motion.div>
   );
@@ -65,7 +68,13 @@ export default function PlayerDashboard() {
   const [error, setError] = useState(null);
   const [lastN, setLastN] = useState(10);
   const [showExplain, setShowExplain] = useState(false);
+  const [statInfo, setStatInfo] = useState(null);
+  const gaugeAnchorRef = useRef(null);
   const { gender, toggleGender } = useGender();
+
+  const handleStatInfoClick = (title, content) => {
+    setStatInfo({ title, content });
+  };
 
   const playerName = searchParams.get('player');
 
@@ -187,12 +196,14 @@ export default function PlayerDashboard() {
           >
             <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-20 pointer-events-none" style={{ background: 'var(--accent-glow)', filter: 'blur(60px)' }} />
             <div className="flex flex-col md:flex-row items-center gap-10 relative z-10">
-              <ImpactGauge
-                score={playerData.impact_score || 0}
-                size={200}
-                onInfoClick={() => setShowExplain(true)}
-                showNeonRim={playerData.impact_score >= 80}
-              />
+              <div ref={gaugeAnchorRef} className="shrink-0">
+                <ImpactGauge
+                  score={playerData.impact_score || 0}
+                  size={200}
+                  onInfoClick={() => setShowExplain(true)}
+                  showNeonRim={playerData.impact_score >= 80}
+                />
+              </div>
               <div className="flex-1 text-center md:text-left">
                 <h2 className="font-display font-bold text-[var(--text-primary)] text-2xl md:text-3xl mb-1 flex items-center justify-center md:justify-start gap-2">
                   {playerData.player}
@@ -256,12 +267,14 @@ export default function PlayerDashboard() {
                 value={playerData.context_weight_avg != null ? `${playerData.context_weight_avg}×` : '—'}
                 sub="1.0 = normal; >1.0 = tougher"
                 info="How difficult the situations were when the player batted or bowled."
+                onInfoClick={handleStatInfoClick}
               />
               <StatCard
                 label="Average Pressure Index"
                 value={playerData.pressure_index_avg != null ? `${playerData.pressure_index_avg}×` : '—'}
                 sub="Higher = more critical moments"
                 info="Measures match pressure during player events."
+                onInfoClick={handleStatInfoClick}
               />
             </div>
           </motion.section>
@@ -272,11 +285,19 @@ export default function PlayerDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {wpaData && (
                 <div
-                  className="rounded-2xl p-5 dark-no-border card-hover"
+                  className="rounded-2xl p-5 dark-no-border card-hover relative"
                   style={{ background: 'var(--surface-card)', boxShadow: 'var(--shadow-soft)', border: '1px solid var(--glass-border)' }}
                 >
                   <p className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1 flex items-center gap-1">
-                    Clutch <span className="cursor-help" title="Total win probability swing per match.">ℹ</span>
+                    Clutch{' '}
+                    <button
+                      type="button"
+                      onClick={() => handleStatInfoClick('Clutch', 'Total win probability swing per match. Measures how much the player shifted their team\'s win probability in high-leverage moments.')}
+                      className="w-5 h-5 rounded flex items-center justify-center text-xs opacity-60 hover:opacity-100 hover:bg-[var(--surface-muted)] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                      aria-label="Info about Clutch"
+                    >
+                      ℹ
+                    </button>
                   </p>
                   <p className={`text-3xl font-display font-bold tabular-nums ${(wpaData.clutch_impact_percent || 0) >= 0 ? 'text-[var(--accent-strong)]' : 'text-[var(--accent)]'}`}>
                     {(wpaData.clutch_impact_percent >= 0 ? '+' : '')}{wpaData.clutch_impact_percent}%
@@ -289,6 +310,7 @@ export default function PlayerDashboard() {
                 value={playerData.impact_weighted != null ? playerData.impact_weighted : '—'}
                 sub="Context-weighted"
                 info="Impact score adjusted for match context."
+                onInfoClick={handleStatInfoClick}
               />
             </div>
           </motion.section>
@@ -340,6 +362,13 @@ export default function PlayerDashboard() {
         onClose={() => setShowExplain(false)}
         explain={playerData?.explain}
         lastNInnings={playerData?.last_n_innings || []}
+        anchorRef={gaugeAnchorRef}
+      />
+      <StatInfoModal
+        isOpen={!!statInfo}
+        onClose={() => setStatInfo(null)}
+        title={statInfo?.title ?? ''}
+        content={statInfo?.content ?? ''}
       />
     </div>
   );

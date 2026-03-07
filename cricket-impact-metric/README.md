@@ -85,10 +85,19 @@ For each ball: `impact = win_prob_after − win_prob_before`
 | `GET /players` | List/search players |
 | `GET /players/{name}/impact` | Player impact score + stats |
 | `GET /players/{name}/trend` | Last N innings trend |
+| `GET /players/{name}/predict?opponent=India` | Predicted impact vs opponent (same/other venue when venue data exists) |
+| `GET /players/{name}/predict/history` | Innings with inferred opponent per match |
+| `GET /players/{name}/predict/matchup?role=batter&against_type=spin` | Predicted impact vs bowler/batsman type |
+| `GET /players/predict/matchup-types` | Available role and against_type options |
 | `GET /leaderboard` | Top 50 by impact |
 | `GET /matches` | List matches |
 | `GET /matches/{id}` | Match impact breakdown |
 | `GET /stats` | Global statistics |
+
+### Predictions (opponent, venue, matchup)
+
+- **Vs opponent**: Uses historical impact in matches vs that team (recency-weighted). Opponent is inferred from the other team in each match. Optional `venue` and `same_venue` support same-stadium vs other-stadium once venue is stored per match.
+- **Matchup (batsman vs bowler type / bowler vs batsman type)**: Uses heuristic modifiers on baseline impact until delivery-level or type-aggregated data is available. Types: for batters `pace`, `spin`, `aggressive_bowler`, `defensive_bowler`; for bowlers `aggressive_batsman`, `accumulator`, etc. For production-grade matchup predictions, ball-by-ball (batsman–bowler) or pre-aggregated “vs type” stats are required.
 
 ## Tech Stack
 

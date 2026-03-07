@@ -1,18 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Trophy, Target, TrendingUp, Zap, ChevronRight, BarChart3, ShieldCheck } from 'lucide-react';
+import { Trophy, Target, TrendingUp, Zap, ChevronRight, BarChart3, ShieldCheck, Code2, Layers, Type, Palette, Move, FileCode } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ScrollVelocity from '../components/ScrollVelocity';
 import TextType from '../components/TextType';
 import LogoLoop from '../components/LogoLoop';
-import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss, SiFramer, SiPython } from 'react-icons/si';
 
 const techLogos = [
-  { node: <SiReact />, title: "React", href: "https://react.dev" },
-  { node: <SiNextdotjs />, title: "Next.js", href: "https://nextjs.org" },
-  { node: <SiTypescript />, title: "TypeScript", href: "https://www.typescriptlang.org" },
-  { node: <SiTailwindcss />, title: "Tailwind CSS", href: "https://tailwindcss.com" },
-  { node: <SiFramer />, title: "Framer Motion", href: "https://www.framer.com/motion/" },
-  { node: <SiPython />, title: "Python", href: "https://www.python.org/" },
+  { node: <Code2 className="w-10 h-10 text-emerald-400" />, title: "React", href: "https://react.dev" },
+  { node: <Layers className="w-10 h-10 text-emerald-400" />, title: "Next.js", href: "https://nextjs.org" },
+  { node: <Type className="w-10 h-10 text-emerald-400" />, title: "TypeScript", href: "https://www.typescriptlang.org" },
+  { node: <Palette className="w-10 h-10 text-emerald-400" />, title: "Tailwind CSS", href: "https://tailwindcss.com" },
+  { node: <Move className="w-10 h-10 text-emerald-400" />, title: "Framer Motion", href: "https://www.framer.com/motion/" },
+  { node: <FileCode className="w-10 h-10 text-emerald-400" />, title: "Python", href: "https://www.python.org/" },
 ];
 
 // Simple Intersection Observer hook for scroll animations

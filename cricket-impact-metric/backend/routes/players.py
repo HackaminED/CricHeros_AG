@@ -8,6 +8,13 @@ from backend.services.impact_engine import get_player_impact_data, ALLOWED_TEAMS
 from backend.services.rolling_impact import get_player_rolling_trend, get_player_career_stats
 from backend.services.wpa_service import get_player_wpa
 from backend.services.cis_engine import get_player_cis
+from backend.services.prediction_service import (
+    predict_impact_vs_opponent,
+    predict_impact_vs_opponent_at_venue,
+    predict_matchup,
+    get_player_innings_with_opponent,
+    get_available_matchup_types,
+)
 
 router = APIRouter(prefix="/players", tags=["players"])
 
@@ -73,6 +80,13 @@ def search_players(
     params = (like_q, gender, prefix_q, word_q)
     rows = query_all(query, params)
     return {"players": rows, "count": len(rows)}
+
+
+@router.get("/predict/matchup-types")
+def list_matchup_types():
+    """List available role and against_type options for matchup predictions."""
+    return get_available_matchup_types()
+
 
 @router.get("/{name}/impact")
 def get_player_impact(
@@ -190,6 +204,65 @@ def get_player_cis_route(
 ):
     """Get Counterfactual Impact Score (CIS), choke index, pressure isotherm data."""
     data = get_player_cis(name, last_n=last_n, gender=gender)
+    if not data:
+        raise HTTPException(status_code=404, detail=f"Player '{name}' not found")
+    return data
+
+
+# ---------------------------------------------------------------------------
+# Predictions: impact vs opponent / venue / matchup type
+# ---------------------------------------------------------------------------
+
+@router.get("/{name}/predict")
+def get_player_predict_vs_opponent(
+    name: str,
+    opponent: str = Query(..., description="Opponent team name (e.g. India, Australia)"),
+    venue: str | None = Query(None, description="Optional venue for same-venue vs other-venue breakdown (when venue data exists)"),
+    same_venue: bool = Query(False, description="If venue given, predict only at that venue"),
+    gender: str = "Men",
+):
+    """
+    Predict expected impact for a player against a specific opponent.
+    Uses historical impact in matches vs that opponent (recency-weighted).
+    Optionally: same venue vs other venues when venue data is available.
+    """
+    if venue and same_venue:
+        data = predict_impact_vs_opponent_at_venue(name, opponent, venue, same_venue=True, gender=gender)
+    else:
+        data = predict_impact_vs_opponent(name, opponent, venue=venue, gender=gender)
+    if not data:
+        raise HTTPException(status_code=404, detail=f"Player '{name}' not found or no data")
+    return data
+
+
+@router.get("/{name}/predict/history")
+def get_player_opponent_history(
+    name: str,
+    gender: str = "Men",
+    max_innings: int = Query(100, ge=1, le=200),
+):
+    """Get player's innings with inferred opponent for each match (for building predictions)."""
+    data = get_player_innings_with_opponent(name, gender=gender, max_innings=max_innings)
+    if not data:
+        raise HTTPException(status_code=404, detail=f"Player '{name}' not found")
+    return {"player": name, "innings": data, "count": len(data)}
+
+
+@router.get("/{name}/predict/matchup")
+def get_player_predict_matchup(
+    name: str,
+    role: str = Query(..., description="batter or bowler"),
+    against_type: str = Query(..., description="e.g. pace, spin (for batter); aggressive_batsman, accumulator (for bowler)"),
+    gender: str = "Men",
+    last_n: int = Query(10, ge=1, le=20),
+):
+    """
+    Predict how a batsman will do against a type of bowler, or how a bowler will do against a type of batsman.
+    Uses heuristic modifiers until delivery-level or type-aggregated data is available.
+    """
+    if role.lower() not in ("batter", "bowler"):
+        raise HTTPException(status_code=400, detail="role must be 'batter' or 'bowler'")
+    data = predict_matchup(name, role=role, against_type=against_type, gender=gender, last_n=last_n)
     if not data:
         raise HTTPException(status_code=404, detail=f"Player '{name}' not found")
     return data

@@ -94,6 +94,12 @@
 .stagger-children > *:nth-child(9) { animation-delay: 0.45s; opacity: 0; }
 .stagger-children > *:nth-child(n+10) { animation-delay: 0.5s; opacity: 0; }
 
+/* Min innings dropdown: dark text on light background for readability */
+select option {
+  color: #111;
+  background: #fff;
+}
+
 .impact-low { color: #dc2626; }
 .impact-mid { color: #d97706; }
 .impact-high { color: #059669; }

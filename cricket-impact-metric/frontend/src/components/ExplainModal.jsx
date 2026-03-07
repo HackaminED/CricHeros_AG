@@ -1,6 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 
-export default function ExplainModal({ isOpen, onClose, explain, lastNInnings = [] }) {
+const GAP = 16;
+
+export default function ExplainModal({ isOpen, onClose, explain, lastNInnings = [], anchorRef = null }) {
+  const [position, setPosition] = useState(null);
+
   useEffect(() => {
     if (!isOpen) return;
     const handleEscape = (e) => {
@@ -10,7 +14,31 @@ export default function ExplainModal({ isOpen, onClose, explain, lastNInnings = 
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
 
+  useLayoutEffect(() => {
+    if (!isOpen || !anchorRef?.current) {
+      setPosition(null);
+      return;
+    }
+    const el = anchorRef.current;
+    const rect = el.getBoundingClientRect();
+    const maxW = 420;
+    const maxH = Math.min(window.innerHeight - 32, 85 * window.innerHeight / 100);
+    let left = rect.right + GAP;
+    let top = rect.top;
+    if (left + maxW > window.innerWidth - 24) {
+      left = window.innerWidth - maxW - 24;
+    }
+    if (left < 24) left = 24;
+    if (top + maxH > window.innerHeight - 24) {
+      top = Math.max(24, window.innerHeight - maxH - 24);
+    }
+    if (top < 24) top = 24;
+    setPosition({ left, top, maxWidth: maxW, maxHeight: maxH });
+  }, [isOpen, anchorRef]);
+
   if (!isOpen) return null;
+
+  const useAnchor = anchorRef?.current && position;
 
   return (
     <div
@@ -19,11 +47,25 @@ export default function ExplainModal({ isOpen, onClose, explain, lastNInnings = 
       role="dialog"
       aria-modal="true"
       aria-labelledby="explain-modal-title"
+      style={useAnchor ? { alignItems: 'flex-start', justifyContent: 'flex-start', padding: 0 } : {}}
     >
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" aria-hidden />
       <div
         className="relative rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto focus:outline-none dark-no-border animate-page-enter"
-        style={{ background: 'var(--surface-card)', boxShadow: 'var(--shadow-strong)', border: '1px solid var(--glass-border)' }}
+        style={{
+          background: 'var(--surface-card)',
+          boxShadow: 'var(--shadow-strong)',
+          border: '1px solid var(--glass-border)',
+          ...(useAnchor ? {
+            position: 'fixed',
+            left: position.left,
+            top: position.top,
+            width: position.maxWidth,
+            maxWidth: position.maxWidth,
+            maxHeight: position.maxHeight,
+            zIndex: 51,
+          } : {}),
+        }}
         onClick={(e) => e.stopPropagation()}
         tabIndex={-1}
       >

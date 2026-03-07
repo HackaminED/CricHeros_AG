@@ -84,7 +84,7 @@ export default function Leaderboard() {
   const loadClutch = async () => {
     setClutchLoading(true);
     try {
-      const res = await getLeaderboardClutch(gender, 5, 100);
+      const res = await getLeaderboardClutch(gender, 10, 100);
       setClutchData(res.leaderboard || []);
     } catch (err) {
       console.error(err);
