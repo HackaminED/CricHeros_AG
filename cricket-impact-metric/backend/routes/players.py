@@ -6,6 +6,8 @@ from fastapi import APIRouter, HTTPException, Query
 from backend.database.db import query_all, query_one
 from backend.services.impact_engine import get_player_impact_data, ALLOWED_TEAMS
 from backend.services.rolling_impact import get_player_rolling_trend, get_player_career_stats
+from backend.services.wpa_service import get_player_wpa
+from backend.services.cis_engine import get_player_cis
 
 router = APIRouter(prefix="/players", tags=["players"])
 
@@ -165,3 +167,29 @@ def get_player_trend(
         "trend_3layer": enriched,
         "count": len(trend),
     }
+
+
+@router.get("/{name}/wpa")
+def get_player_wpa_route(
+    name: str,
+    last_n: int = Query(10, ge=1, le=50),
+    gender: str = "Men",
+):
+    """Get aggregated match swing (WPA) across last N matches. Clutch Impact %."""
+    data = get_player_wpa(name, last_n=last_n, gender=gender)
+    if not data:
+        raise HTTPException(status_code=404, detail=f"Player '{name}' not found")
+    return data
+
+
+@router.get("/{name}/cis")
+def get_player_cis_route(
+    name: str,
+    last_n: int = Query(10, ge=1, le=10),
+    gender: str = "Men",
+):
+    """Get Counterfactual Impact Score (CIS), choke index, pressure isotherm data."""
+    data = get_player_cis(name, last_n=last_n, gender=gender)
+    if not data:
+        raise HTTPException(status_code=404, detail=f"Player '{name}' not found")
+    return data

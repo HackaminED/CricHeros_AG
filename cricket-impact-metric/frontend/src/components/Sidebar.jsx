@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useGender } from '../context/GenderContext';
+import { useTheme } from '../context/ThemeContext';
 import GenderToggle from './GenderToggle';
 
 const navItems = [
@@ -10,6 +11,8 @@ const navItems = [
 ];
 
 export default function Sidebar({ open = true, onCollapse }) {
+  const { theme, setTheme } = useTheme();
+
   return (
     <aside
       className="fixed md:sticky top-0 left-0 h-screen z-40 flex flex-col w-[280px] shrink-0 transition-all duration-300"
@@ -19,20 +22,38 @@ export default function Sidebar({ open = true, onCollapse }) {
       role="navigation"
       aria-label="Main navigation"
     >
-      {/* Logo */}
+      {/* Logo + theme toggle */}
       <div className="sidebar-section px-4 py-6 border-b border-[var(--muted)]/40">
-        <div className="flex items-center gap-3">
-          <div
-            className="w-10 h-10 rounded-[var(--radius-md)] flex items-center justify-center text-xl font-bold text-white shadow-soft"
-            style={{ background: 'var(--accent-strong)' }}
-          >
-            IM
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-[10px] min-w-0">
+            <img
+              src="/favicon.png"
+              alt=""
+              className="w-9 h-9 shrink-0 rounded-full object-cover"
+              aria-hidden
+            />
+            {open && (
+              <div className="hidden md:block min-w-0">
+                <p
+                  className="font-display font-bold truncate"
+                  style={{ fontSize: '20px', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)', marginBottom: '2px' }}
+                >
+                  Impact Heros
+                </p>
+                <p className="text-[var(--text-secondary)] text-xs">Performance Analytics</p>
+              </div>
+            )}
           </div>
           {open && (
-            <div className="hidden md:block">
-              <p className="font-display font-bold text-[var(--text-primary)] text-sm">Cricket Impact</p>
-              <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-widest">Metric</p>
-            </div>
+            <button
+              type="button"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="hidden md:flex items-center gap-1.5 shrink-0 px-3 py-1.5 rounded-[999px] text-xs font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgba(0,78,152,0.5)]"
+              style={{ background: 'var(--surface-muted)', color: 'var(--text-primary)' }}
+              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? '🌙 Dark' : '☀ Light'}
+            </button>
           )}
         </div>
       </div>

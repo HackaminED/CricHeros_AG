@@ -52,6 +52,17 @@ export const getMatches = async (limit = 50, team = null, gender = 'Men') => {
 export const getMatch = (matchId) =>
     api.get(`/matches/${matchId}`).then(r => r.data);
 
+// Match WPA (Match Swing timeline + per-player aggregates)
+export const getMatchWpa = (matchId, gender = 'Men') =>
+    api.get(`/matches/${matchId}/wpa`, { params: { gender } }).then(r => r.data);
+
+// Player WPA (Clutch Impact across last N matches)
+export const getPlayerWpa = (playerName, lastN = 10, gender = 'Men') =>
+    api.get(`/players/${encodeURIComponent(playerName)}/wpa`, { params: { last_n: lastN, gender } }).then(r => r.data);
+
+export const getLeaderboardClutch = (gender = 'Men', minMatches = 5, topK = 100) =>
+    api.get('/leaderboard/clutch', { params: { gender, min_matches: minMatches, top_k: topK } }).then(r => r.data);
+
 // Stats
 export const getStats = () =>
     api.get('/stats').then(r => r.data);

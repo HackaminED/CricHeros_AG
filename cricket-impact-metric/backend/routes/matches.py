@@ -5,8 +5,21 @@ matches.py — Match-related API routes.
 from fastapi import APIRouter, HTTPException, Query
 from backend.database.db import query_all
 from backend.services.impact_engine import get_match_impact_data, ALLOWED_TEAMS
+from backend.services.wpa_service import get_match_wpa
 
 router = APIRouter(prefix="/matches", tags=["matches"])
+
+
+@router.get("/{match_id}/wpa")
+def get_match_wpa_route(
+    match_id: str,
+    gender: str = "Men",
+):
+    """Get per-ball WP timeline and per-player swing aggregates for a match."""
+    data = get_match_wpa(match_id, gender=gender)
+    if not data:
+        raise HTTPException(status_code=404, detail=f"Match '{match_id}' not found or no WPA data")
+    return data
 
 
 @router.get("/{match_id}")
