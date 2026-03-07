@@ -1,28 +1,8 @@
 import React from 'react';
 import { useGender } from '../context/GenderContext';
+import CategoryBadge from './CategoryBadge';
 
 export default function PlayerCard({
-  player,
-  team,
-  impactScore,
-  category,
-  totalInnings,
-  totalRuns,
-  totalWickets,
-  onClick,
-  isTop3 = false,
-}) {
-  const { gender } = useGender();
-
-  const categoryStyles = {
-    'Match Winner': 'bg-[var(--accent)] text-white',
-    'High Impact': 'bg-[var(--surface)] text-white',
-    'Neutral': 'bg-[var(--muted)] text-[var(--text-primary)]',
-    'Low Impact': 'bg-[var(--accent)]/80 text-white',
-    'Poor Impact': 'bg-[var(--muted)] text-[var(--text-primary)]',
-  };
-
-  return (
     <article
       onClick={onClick}
       onKeyDown={(e) => {
@@ -33,7 +13,7 @@ export default function PlayerCard({
       }}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      className={`rounded-[var(--radius-lg)] p-4 transition-all duration-200 ${
+      className={`rounded-[var(--radius-lg)] p-4 transition-all duration-200 dark-no-border ${
         onClick ? 'card-hover cursor-pointer' : ''
       } focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[rgba(0,78,152,0.5)]`}
       style={{
@@ -62,12 +42,8 @@ export default function PlayerCard({
         </span>
       </div>
       {category && (
-        <span
-          className={`inline-block mt-2 px-3 py-1 rounded-[var(--radius-pill)] text-xs font-semibold ${
-            categoryStyles[category] || 'bg-[var(--muted)] text-[var(--text-primary)]'
-          }`}
-        >
-          {category}
+        <span className="mt-2 inline-block">
+          <CategoryBadge category={category} />
         </span>
       )}
       {(totalInnings != null || totalRuns != null || totalWickets != null) && (

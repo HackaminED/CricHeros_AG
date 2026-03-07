@@ -1,14 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGender } from '../context/GenderContext';
-
-const categoryStyles = {
-  'Match Winner': 'bg-[var(--accent)] text-white',
-  'High Impact': 'bg-[var(--surface)] text-white',
-  'Neutral': 'bg-[var(--muted)] text-[var(--text-primary)]',
-  'Low Impact': 'bg-[var(--accent)]/80 text-white',
-  'Poor Impact': 'bg-[var(--muted)] text-[var(--text-primary)]',
-};
+import CategoryBadge from './CategoryBadge';
 
 function RankCell({ index }) {
   if (index === 0) return <span aria-label="Gold">🥇</span>;
@@ -90,7 +83,7 @@ export default function LeaderboardTable({
 
       {/* Table */}
       <div
-        className="rounded-[var(--radius-lg)] overflow-hidden"
+        className="rounded-[var(--radius-lg)] overflow-hidden dark-no-border"
         style={{ boxShadow: 'var(--shadow-soft)', background: 'var(--surface-card)', border: '1px solid rgba(58,110,165,0.2)' }}
       >
         <div className="overflow-x-auto">
@@ -150,13 +143,7 @@ export default function LeaderboardTable({
                     </span>
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <span
-                      className={`px-3 py-1 rounded-[var(--radius-pill)] text-xs font-semibold ${
-                        categoryStyles[p.category] || 'bg-[var(--muted)] text-[var(--text-primary)]'
-                      }`}
-                    >
-                      {p.category}
-                    </span>
+                    <CategoryBadge category={p.category} />
                   </td>
                   <td className="px-4 py-3 text-right font-mono tabular-nums text-[var(--text-primary)]">
                     {p.total_innings}

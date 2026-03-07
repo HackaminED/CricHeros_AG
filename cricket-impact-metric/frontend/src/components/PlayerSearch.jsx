@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getPlayers } from '../api/api';
 import { useGender } from '../context/GenderContext';
+import { useTheme } from '../context/ThemeContext';
 
 export default function PlayerSearch({ onSelect }) {
   const { gender } = useGender();
+  const { theme } = useTheme();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -99,11 +101,12 @@ export default function PlayerSearch({ onSelect }) {
           onKeyDown={handleKeyDown}
           onFocus={() => results.length > 0 && setIsOpen(true)}
           placeholder="Search players…"
-          className="w-full pl-11 pr-4 py-3 rounded-[var(--radius-lg)] text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[rgba(0,78,152,0.5)] transition-all"
+          className="player-search-input w-full pl-11 pr-4 py-3 rounded-[var(--radius-lg)] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[rgba(0,78,152,0.5)] transition-all"
           style={{
-            background: '#fff',
+            background: theme === 'dark' ? 'var(--surface-muted)' : '#fff',
             boxShadow: 'var(--shadow-soft)',
-            border: '1px solid var(--muted)',
+            border: theme === 'dark' ? 'none' : '1px solid var(--muted)',
+            color: 'var(--input-text)',
           }}
           id="player-search-input"
           aria-label="Search players"
@@ -124,7 +127,7 @@ export default function PlayerSearch({ onSelect }) {
       {isOpen && results.length > 0 && (
         <ul
           id="search-suggestions"
-          className="absolute top-full mt-2 w-full rounded-[var(--radius-lg)] overflow-hidden z-50 shadow-strong border border-[var(--muted)]/50"
+          className="absolute top-full mt-2 w-full rounded-[var(--radius-lg)] overflow-hidden z-50 shadow-strong dark-no-border border border-[var(--muted)]/50"
           style={{ background: 'var(--bg)' }}
           role="listbox"
         >

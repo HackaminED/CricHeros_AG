@@ -13,6 +13,8 @@
   --muted: #C0C0C0;
   --text-primary: #0B1931;
   --text-secondary: #334e70;
+  --input-text: var(--text-primary);
+  --input-placeholder: var(--text-secondary);
 
   /* Surface variants (layering) */
   --surface-muted: rgba(58, 110, 165, 0.12);
@@ -70,6 +72,26 @@
   --surface-panel: rgba(58, 110, 165, 0.15);
   --shadow-soft: 0 6px 8px rgba(0, 0, 0, 0.2), inset 0 -6px 12px rgba(0, 78, 152, 0.1);
   --shadow-strong: 0 8px 18px rgba(0, 0, 0, 0.3), inset 0 -10px 18px rgba(58, 110, 165, 0.12);
+  /* Dark mode: search input text (Player Search on dashboard) */
+  --input-text: #E6EDF3;
+  --input-placeholder: #9BA3AF;
+}
+
+/* Dark mode: remove all divider lines; use spacing/shadows instead */
+[data-theme="dark"] .header-bar,
+[data-theme="dark"] .dark-no-border {
+  border: none !important;
+}
+[data-theme="dark"] .sidebar-section {
+  border-width: 0 !important;
+}
+[data-theme="dark"] .panel-header {
+  border-width: 0 !important;
+}
+[data-theme="dark"] thead tr th,
+[data-theme="dark"] tbody tr td,
+[data-theme="dark"] tbody tr {
+  border-color: transparent !important;
 }
 
 /* Base application */
@@ -93,4 +115,9 @@ body {
 /* Tabular figures for numeric columns */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+/* Player search: placeholder uses token for dark/light */
+.player-search-input::placeholder {
+  color: var(--input-placeholder);
 }

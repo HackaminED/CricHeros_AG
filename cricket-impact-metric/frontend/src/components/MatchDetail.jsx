@@ -1,26 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGender } from '../context/GenderContext';
-
-const categoryStyles = {
-  'Match Winner': 'bg-[var(--accent)] text-white',
-  'High Impact': 'bg-[var(--surface)] text-white',
-  'Neutral': 'bg-[var(--muted)] text-[var(--text-primary)]',
-  'Low Impact': 'bg-[var(--accent)]/80 text-white',
-  'Poor Impact': 'bg-[var(--muted)] text-[var(--text-primary)]',
-};
-
-function CategoryBadge({ category }) {
-  return (
-    <span
-      className={`px-2 py-0.5 rounded-[var(--radius-pill)] text-xs font-semibold ${
-        categoryStyles[category] || 'bg-[var(--muted)] text-[var(--text-primary)]'
-      }`}
-    >
-      {category || '—'}
-    </span>
-  );
-}
+import CategoryBadge from './CategoryBadge';
 
 export default function MatchDetail({ matchId, matchData, loading, onBack }) {
   const navigate = useNavigate();
@@ -86,10 +67,11 @@ export default function MatchDetail({ matchId, matchData, loading, onBack }) {
             boxShadow: 'var(--shadow-soft)',
             border: '1px solid rgba(58,110,165,0.2)',
           }}
+          className="dark-no-border"
           aria-label={`Roster: ${teamName}`}
         >
           <div
-            className="px-6 py-4 border-b border-[var(--muted)]/40"
+            className="px-6 py-4 panel-header border-b border-[var(--muted)]/40"
             style={{ background: 'var(--surface-muted)' }}
           >
             <h3

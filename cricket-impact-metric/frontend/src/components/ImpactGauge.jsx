@@ -35,7 +35,7 @@ export default function ImpactGauge({
 
   return (
     <div
-      className="relative flex flex-col items-center justify-center p-6 rounded-[var(--radius-lg)]"
+      className="relative flex flex-col items-center justify-center p-6 rounded-[var(--radius-lg)] dark-no-border"
       style={{
         background: 'var(--surface-card)',
         boxShadow: 'var(--shadow-strong)',

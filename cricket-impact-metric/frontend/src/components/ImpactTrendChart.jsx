@@ -52,7 +52,7 @@ export default function ImpactTrendChart({ data = [], height = 300, use3Layer = 
 
   return (
     <div
-      className="w-full rounded-[var(--radius-lg)] p-6 flex flex-col"
+      className="w-full rounded-[var(--radius-lg)] p-6 flex flex-col dark-no-border"
       style={{
         height,
         background: 'var(--surface-card)',

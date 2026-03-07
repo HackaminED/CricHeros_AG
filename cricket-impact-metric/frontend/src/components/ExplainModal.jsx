@@ -22,14 +22,14 @@ export default function ExplainModal({ isOpen, onClose, explain, lastNInnings = 
     >
       <div className="absolute inset-0 bg-[var(--text-primary)]/40" aria-hidden />
       <div
-        className="relative rounded-[var(--radius-lg)] max-w-2xl w-full max-h-[85vh] overflow-y-auto border border-[var(--muted)]/50 shadow-strong animate-fade-in focus:outline-none"
+        className="relative rounded-[var(--radius-lg)] max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-strong animate-fade-in focus:outline-none dark-no-border border border-[var(--muted)]/50"
         style={{ background: 'var(--bg)' }}
         onClick={(e) => e.stopPropagation()}
         tabIndex={-1}
       >
         {/* Header bar */}
         <div
-          className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-[var(--muted)]/40"
+          className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 panel-header border-b border-[var(--muted)]/40"
           style={{ background: 'var(--surface)', color: 'white' }}
         >
           <h2 id="explain-modal-title" className="font-display font-bold text-lg">

@@ -14,14 +14,14 @@ export default function InningsTable({ innings = [], highPressureThreshold = 1.5
 
   return (
     <div
-      className="rounded-[var(--radius-lg)] overflow-hidden"
+      className="rounded-[var(--radius-lg)] overflow-hidden dark-no-border"
       style={{
         background: 'var(--surface-card)',
         boxShadow: 'var(--shadow-soft)',
         border: '1px solid rgba(58,110,165,0.2)',
       }}
     >
-      <div className="px-6 py-4 border-b border-[var(--muted)]/40">
+      <div className="px-6 py-4 panel-header border-b border-[var(--muted)]/40">
         <h3 className="font-display font-semibold text-[var(--text-primary)]" style={{ fontSize: 'var(--text-h3)' }}>
           Innings Breakdown (Last {innings.length})
         </h3>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { GenderProvider } from './context/GenderContext';
 import { ThemeProvider } from './context/ThemeContext';
 import PlayerDashboard from './pages/PlayerDashboard';
@@ -10,13 +10,9 @@ import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 
 function AppContent() {
-  const navigate = useNavigate();
-  const handlePlayerSelect = (player) => {
-    if (player?.player) navigate(`/player?player=${encodeURIComponent(player.player)}`);
-  };
   return (
     <>
-      <Topbar onPlayerSelect={handlePlayerSelect} />
+      <Topbar />
       <main className="flex-1">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 md:py-8" style={{ '--grid-gap': '24px' }}>
           <Routes>

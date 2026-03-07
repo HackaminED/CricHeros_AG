@@ -35,7 +35,7 @@ export default function MatchList({ matches = [], loading = false, winnerTeamLab
           key={m.match_id}
           type="button"
           onClick={() => navigate(`/matches/${m.match_id}`)}
-          className="rounded-[var(--radius-lg)] p-4 md:p-5 flex flex-wrap items-center justify-between gap-4 text-left transition-all duration-200 card-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[rgba(0,78,152,0.5)]"
+          className="rounded-[var(--radius-lg)] p-4 md:p-5 flex flex-wrap items-center justify-between gap-4 text-left transition-all duration-200 card-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[rgba(0,78,152,0.5)] dark-no-border"
           style={{
             background: 'var(--surface-card)',
             boxShadow: 'var(--shadow-soft)',

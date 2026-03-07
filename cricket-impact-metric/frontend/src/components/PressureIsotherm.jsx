@@ -76,7 +76,7 @@ export default function PressureIsotherm({ data }) {
 
   return (
     <div
-      className="rounded-[var(--radius-lg)] p-4 md:p-6 relative"
+      className="rounded-[var(--radius-lg)] p-4 md:p-6 relative dark-no-border"
       style={{
         background: 'var(--surface-card)',
         boxShadow: 'var(--shadow-soft)',

@@ -5,6 +5,7 @@ import ImpactTrendChart from '../components/ImpactTrendChart';
 import PlayerSearch from '../components/PlayerSearch';
 import ExplainModal from '../components/ExplainModal';
 import InningsTable from '../components/InningsTable';
+import CategoryBadge from '../components/CategoryBadge';
 import { getPlayerImpact, getPlayerTrend } from '../api/api';
 import { useGender } from '../context/GenderContext';
 
@@ -163,11 +164,8 @@ export default function PlayerDashboard() {
                   </span>
                 </p>
                 {playerData.category && (
-                  <span
-                    className="inline-block mt-2 px-3 py-1 rounded-[var(--radius-pill)] text-xs font-semibold text-white"
-                    style={{ background: 'var(--accent)' }}
-                  >
-                    {playerData.category}
+                  <span className="inline-block mt-2">
+                    <CategoryBadge category={playerData.category} />
                   </span>
                 )}
 

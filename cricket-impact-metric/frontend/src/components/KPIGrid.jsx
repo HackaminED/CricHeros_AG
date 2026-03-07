@@ -30,12 +30,12 @@ export default function KPIGrid({ stats = defaultStats }) {
       {cards.map((card, i) => (
         <div
           key={card.label}
-          className="rounded-[var(--radius-lg)] p-5 md:p-6 transition-transform duration-200 hover:shadow-strong"
-          style={{
-            background: 'var(--surface-card)',
-            boxShadow: 'var(--shadow-soft)',
-            border: '1px solid rgba(58,110,165,0.15)',
-          }}
+        className="rounded-[var(--radius-lg)] p-4 md:p-6 transition-transform duration-200 hover:shadow-strong dark-no-border"
+        style={{
+          background: 'var(--surface-card)',
+          boxShadow: 'var(--shadow-soft)',
+          border: '1px solid rgba(58,110,165,0.15)',
+        }}
         >
           <p className="text-[var(--text-small)] text-[var(--text-secondary)] uppercase tracking-wider mb-1">
             {card.label}
