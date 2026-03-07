@@ -1,6 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Trophy, Target, TrendingUp, Zap, ChevronRight, BarChart3, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import ScrollVelocity from '../components/ScrollVelocity';
+import TextType from '../components/TextType';
+import LogoLoop from '../components/LogoLoop';
+import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss, SiFramer, SiPython } from 'react-icons/si';
+
+const techLogos = [
+  { node: <SiReact />, title: "React", href: "https://react.dev" },
+  { node: <SiNextdotjs />, title: "Next.js", href: "https://nextjs.org" },
+  { node: <SiTypescript />, title: "TypeScript", href: "https://www.typescriptlang.org" },
+  { node: <SiTailwindcss />, title: "Tailwind CSS", href: "https://tailwindcss.com" },
+  { node: <SiFramer />, title: "Framer Motion", href: "https://www.framer.com/motion/" },
+  { node: <SiPython />, title: "Python", href: "https://www.python.org/" },
+];
 
 // Simple Intersection Observer hook for scroll animations
 function useInView(threshold = 0.1) {
@@ -90,12 +103,18 @@ export default function LandingPage() {
           </AnimatedReveal>
           
           <AnimatedReveal delay={150}>
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 mb-8">
-              Beyond the Averages.<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400">
-                Measure True Impact.
-              </span>
-            </h1>
+            <div className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight mb-8 min-h-[140px] md:min-h-[200px]">
+              <TextType 
+                text={["Beyond the Averages.", "Measure True Impact."]}
+                typingSpeed={50}
+                pauseDuration={2500}
+                deletingSpeed={30}
+                showCursor={true}
+                cursorCharacter="|"
+                className="text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500"
+                textColors={['transparent', 'transparent']}
+              />
+            </div>
           </AnimatedReveal>
 
           <AnimatedReveal delay={300}>
@@ -121,9 +140,17 @@ export default function LandingPage() {
         <section className="py-24 px-6 relative border-t border-white/5 bg-white/[0.01]">
           <div className="max-w-7xl mx-auto">
             <AnimatedReveal delay={0}>
-              <div className="text-center mb-20">
-                <h2 className="text-3xl md:text-5xl font-extrabold mb-6">Why traditional stats are <span className="text-rose-400">flawed.</span></h2>
-                <p className="text-gray-400 text-xl max-w-2xl mx-auto">In modern T20 cricket, all runs and wickets are not created equal. Our 3-layer architecture fixes the bias.</p>
+              <div className="text-center mb-20 min-h-[100px]">
+                <TextType 
+                  as="h2"
+                  text={["Why traditional stats are flawed.", "Why averages don't win matches.", "Why you need Context & Pressure."]}
+                  typingSpeed={40}
+                  pauseDuration={3000}
+                  deletingSpeed={30}
+                  showCursor={true}
+                  className="text-3xl md:text-5xl font-extrabold mb-6"
+                />
+                <p className="text-gray-400 text-xl max-w-2xl mx-auto mt-4">In modern T20 cricket, all runs and wickets are not created equal. Our 3-layer architecture fixes the bias.</p>
               </div>
             </AnimatedReveal>
 
@@ -183,7 +210,16 @@ export default function LandingPage() {
                   <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-xs font-bold text-violet-400 mb-6 uppercase tracking-wider w-fit">
                     <ShieldCheck className="w-4 h-4" /> Powering the Engine
                   </div>
-                  <h2 className="text-3xl md:text-5xl font-extrabold mb-6">Trained on over <br/><span className="text-violet-400">10,000+ Matches.</span></h2>
+                  <div className="min-h-[120px]">
+                    <TextType
+                      as="h2"
+                      text={["Trained on over 10,000+ Matches.", "Analyzed 1.1 million deliveries.", "Calculated ball-by-ball WPA."]}
+                      typingSpeed={40}
+                      pauseDuration={3000}
+                      deletingSpeed={30}
+                      className="text-3xl md:text-5xl font-extrabold mb-6"
+                    />
+                  </div>
                   <p className="text-gray-400 text-lg md:text-xl leading-relaxed mb-8">
                     Our model analyzes 1.1 million individual deliveries across men's and women's T20 Internationals. We calculate ball-by-ball Win Probability Added (WPA) to ensure the impact score reflects actual contributions to winning.
                   </p>
@@ -230,6 +266,29 @@ export default function LandingPage() {
                 </div>
               </div>
             </AnimatedReveal>
+          </div>
+        </section>
+
+        {/* --- Scroll Velocity Marquee --- */}
+        <section className="py-12 border-t border-white/5 opacity-80 overflow-hidden relative z-0">
+          <ScrollVelocity
+            texts={['CRICHEROS', 'NEIL A', 'BINGHAMPTON UNIVERSITY']} 
+            velocity={50}
+            className="custom-scroll-text"
+          />
+          <div className="mt-12 h-[80px] relative overflow-hidden flex items-center max-w-5xl mx-auto">
+            <LogoLoop
+              logos={techLogos}
+              speed={60}
+              direction="left"
+              logoHeight={40}
+              gap={60}
+              hoverSpeed={0}
+              scaleOnHover={true}
+              fadeOut={true}
+              fadeOutColor="transparent"
+              ariaLabel="Technology Stack"
+            />
           </div>
         </section>
 
