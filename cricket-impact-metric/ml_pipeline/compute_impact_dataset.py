@@ -60,7 +60,7 @@ def aggregate_player_match_impact(deltas_df: pd.DataFrame) -> pd.DataFrame:
     """
     # Batting impact per player per match
     batting = (
-        deltas_df.groupby(["match_id", "striker", "batting_team", "start_date"])
+        deltas_df.groupby(["match_id", "striker", "batting_team", "start_date", "gender"])
         .agg(
             batting_impact=("batting_impact", "sum"),
             balls_faced=("batting_impact", "count"),
@@ -72,7 +72,7 @@ def aggregate_player_match_impact(deltas_df: pd.DataFrame) -> pd.DataFrame:
 
     # Bowling impact per player per match
     bowling = (
-        deltas_df.groupby(["match_id", "bowler", "bowling_team", "start_date"])
+        deltas_df.groupby(["match_id", "bowler", "bowling_team", "start_date", "gender"])
         .agg(
             bowling_impact=("bowling_impact", "sum"),
             balls_bowled=("bowling_impact", "count"),
@@ -87,7 +87,7 @@ def aggregate_player_match_impact(deltas_df: pd.DataFrame) -> pd.DataFrame:
     merged = pd.merge(
         batting,
         bowling,
-        on=["match_id", "player", "team", "start_date"],
+        on=["match_id", "player", "team", "start_date", "gender"],
         how="outer",
     ).fillna(0)
 
@@ -151,8 +151,8 @@ def normalize_impact(df: pd.DataFrame) -> pd.DataFrame:
 
 def get_latest_player_scores(df: pd.DataFrame) -> pd.DataFrame:
     """Get the most recent impact score per player."""
-    latest = df.sort_values("start_date").groupby("player").last().reset_index()
-    return latest[["player", "team", "impact_score", "rolling_impact",
+    latest = df.sort_values("start_date").groupby(["player", "gender"]).last().reset_index()
+    return latest[["player", "team", "gender", "impact_score", "rolling_impact",
                     "batting_impact", "bowling_impact", "match_impact",
                     "runs_scored", "balls_faced", "wickets_taken",
                     "balls_bowled", "runs_conceded", "start_date", "match_id"]]

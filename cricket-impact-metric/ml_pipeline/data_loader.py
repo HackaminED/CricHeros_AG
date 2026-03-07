@@ -19,6 +19,7 @@ def parse_info_file(info_path: str) -> dict:
         "venue": None,
         "date": None,
         "event": None,
+        "gender": None,
         "toss_winner": None,
         "toss_decision": None,
         "winner_runs": None,
@@ -43,6 +44,8 @@ def parse_info_file(info_path: str) -> dict:
                     meta["date"] = parts[2]
                 elif key == "event" and len(parts) > 2:
                     meta["event"] = ",".join(parts[2:])
+                elif key == "gender" and len(parts) > 2:
+                    meta["gender"] = parts[2]
                 elif key == "toss_winner" and len(parts) > 2:
                     meta["toss_winner"] = ",".join(parts[2:])
                 elif key == "toss_decision" and len(parts) > 2:
@@ -93,11 +96,18 @@ def load_all_matches(data_dir: str) -> tuple[pd.DataFrame, dict]:
             meta = parse_info_file(info_path)
             match_info[match_id] = meta
 
-        # Add winner column
+        # Add winner & gender column
         if meta.get("winner"):
             df["winner"] = meta["winner"]
         else:
             df["winner"] = None
+            
+        if meta.get("gender"):
+            # Normalize to "Men" and "Women" for our UI
+            g = meta["gender"].lower()
+            df["gender"] = "Women" if "female" in g or "woman" in g else "Men"
+        else:
+            df["gender"] = "Men" # fallback
 
         # Ensure match_id is string
         df["match_id"] = str(match_id)

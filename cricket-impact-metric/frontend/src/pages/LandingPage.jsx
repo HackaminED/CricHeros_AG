@@ -1,10 +1,32 @@
-"use client";
-
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Trophy, Target, TrendingUp, Zap, ChevronRight, BarChart3, ShieldCheck } from 'lucide-react';
-import { useInView } from '@/hooks/useScrollAnimation';
-import Link from 'next/link';
-import LoadingScreen from '@/components/LoadingScreen';
+import { Link } from 'react-router-dom';
+
+// Simple Intersection Observer hook for scroll animations
+function useInView(threshold = 0.1) {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect(); // Animate only once
+        }
+      },
+      { threshold }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, [threshold]);
+
+  return { ref, isVisible };
+}
 
 // ─── AnimatedReveal ────────────────────────────────────────────────
 function AnimatedReveal({
@@ -12,11 +34,6 @@ function AnimatedReveal({
   delay = 0,
   className = "",
   direction = "up"
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  className?: string;
-  direction?: "up" | "left" | "right";
 }) {
   const { ref, isVisible } = useInView(0.1);
 
@@ -41,13 +58,8 @@ function AnimatedReveal({
 
 // ─── Main Landing Page ─────────────────────────────────────────────
 export default function LandingPage() {
-  const [showLoading, setShowLoading] = useState(true);
-
   return (
     <main className="min-h-screen bg-[#050505] text-gray-100 selection:bg-emerald-500/30 overflow-x-hidden">
-      {showLoading && (
-        <LoadingScreen onComplete={() => setShowLoading(false)} />
-      )}
 
       {/* --- Ambient Mesh Gradients --- */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
@@ -56,10 +68,20 @@ export default function LandingPage() {
         <div className="absolute top-[30%] left-[20%] w-[30%] h-[30%] bg-teal-500/5 blur-[100px] rounded-full mix-blend-screen" />
       </div>
 
-      <div className="relative z-10">
-        
+      <div className="relative z-10 w-full">
+        {/* --- Header / Nav --- */}
+        <header className="px-6 py-6 w-full max-w-7xl mx-auto flex justify-between items-center opacity-0 animate-[fadeIn_1s_ease-out_forwards]">
+          <div className="flex items-center gap-2">
+            <Trophy className="w-6 h-6 text-emerald-400" />
+            <span className="font-bold text-xl tracking-tight text-white">Impact Metric</span>
+          </div>
+          <Link to="/leaderboard" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">
+            Go to App
+          </Link>
+        </header>
+
         {/* --- Hero Section --- */}
-        <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
+        <section className="relative pt-20 pb-20 md:pt-32 md:pb-32 px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
           <AnimatedReveal delay={0}>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium text-emerald-400 mb-8 backdrop-blur-md">
               <Zap className="w-4 h-4" />
@@ -68,9 +90,9 @@ export default function LandingPage() {
           </AnimatedReveal>
           
           <AnimatedReveal delay={150}>
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight text-transparent bg-clip-text bg-linear-to-b from-white to-gray-500 mb-8">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 mb-8">
               Beyond the Averages.<br />
-              <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-400 via-teal-400 to-cyan-400">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400">
                 Measure True Impact.
               </span>
             </h1>
@@ -85,7 +107,7 @@ export default function LandingPage() {
           <AnimatedReveal delay={450}>
             <div className="flex flex-col sm:flex-row items-center gap-6 justify-center">
               <Link 
-                href="/leaderboard" 
+                to="/leaderboard" 
                 className="group relative px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-full overflow-hidden transition-all duration-300 transform hover:scale-105 shadow-[0_0_40px_rgba(16,185,129,0.3)] hover:shadow-[0_0_60px_rgba(16,185,129,0.5)] flex items-center gap-3"
               >
                 <span className="relative z-10">Explore Global Leaderboard</span>
@@ -154,11 +176,11 @@ export default function LandingPage() {
         <section className="py-24 px-6 relative">
           <div className="max-w-7xl mx-auto">
             <AnimatedReveal delay={0}>
-              <div className="bg-linear-to-br from-gray-900 to-black border border-white/10 p-10 md:p-16 rounded-[3rem] overflow-hidden relative flex flex-col md:flex-row items-center justify-between gap-12">
+              <div className="bg-gradient-to-br from-gray-900 to-black border border-white/10 p-10 md:p-16 rounded-[3rem] overflow-hidden relative flex flex-col md:flex-row items-center justify-between gap-12 text-left">
                 <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-violet-600/20 blur-[120px] rounded-full mix-blend-screen pointer-events-none" />
                 
                 <div className="flex-1 relative z-10">
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-xs font-bold text-violet-400 mb-6 uppercase tracking-wider">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-xs font-bold text-violet-400 mb-6 uppercase tracking-wider w-fit">
                     <ShieldCheck className="w-4 h-4" /> Powering the Engine
                   </div>
                   <h2 className="text-3xl md:text-5xl font-extrabold mb-6">Trained on over <br/><span className="text-violet-400">10,000+ Matches.</span></h2>
@@ -173,12 +195,12 @@ export default function LandingPage() {
                       "Normalized globally on a 0-100 scale"
                     ].map((item, i) => (
                       <li key={i} className="flex items-center gap-3 text-gray-300">
-                        <div className="w-1.5 h-1.5 rounded-full bg-violet-500" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-violet-500 shrink-0" />
                         {item}
                       </li>
                     ))}
                   </ul>
-                  <Link href="/leaderboard" className="text-white font-semibold hover:text-violet-400 transition-colors flex items-center gap-2">
+                  <Link to="/leaderboard" className="text-white font-semibold hover:text-violet-400 transition-colors flex items-center gap-2 w-fit">
                     See the results <ChevronRight className="w-4 h-4" />
                   </Link>
                 </div>
@@ -187,12 +209,12 @@ export default function LandingPage() {
                   <div className="bg-black/50 border border-white/10 rounded-3xl p-6 backdrop-blur-xl shadow-2xl skew-y-3 transform hover:skew-y-0 transition-transform duration-700">
                     <div className="flex items-center justify-between mb-6 pb-6 border-b border-white/10">
                       <div>
-                        <div className="text-sm text-gray-400 mb-1">Impact = </div>
-                        <div className="text-2xl font-mono text-emerald-400 font-bold">Perf × Context × Pressure</div>
+                        <div className="text-sm text-gray-400 mb-1 font-sans">Impact = </div>
+                        <div className="text-2xl font-mono text-emerald-400 font-bold tracking-tight">Perf × Context × Pressure</div>
                       </div>
                       <Trophy className="w-8 h-8 text-white/20" />
                     </div>
-                    <div className="space-y-4 hidden md:block">
+                    <div className="space-y-4 hidden sm:block">
                       {['Player 1', 'Player 2', 'Player 3'].map((p, i) => (
                         <div key={i} className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
