@@ -6,8 +6,30 @@ from fastapi import APIRouter, HTTPException, Query
 from backend.database.db import query_all
 from backend.services.impact_engine import get_match_impact_data, ALLOWED_TEAMS
 from backend.services.wpa_service import get_match_wpa
+from backend.services.prediction_service import get_match_prediction, get_match_prediction_options
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/matches", tags=["matches"])
+
+class MatchPredictionRequest(BaseModel):
+    team1: str
+    team2: str
+    venue: str
+    toss_winner: str
+    toss_decision: str
+    gender: str = "Men"
+
+@router.post("/predict")
+def predict_match(req: MatchPredictionRequest):
+    """Predicts win probability for team1 vs team2 based on venue and toss conditions."""
+    return get_match_prediction(
+        req.team1, req.team2, req.venue, req.toss_winner, req.toss_decision, req.gender
+    )
+
+@router.get("/predict/options")
+def match_prediction_options():
+    """Returns available dropdown options required for the match predictor."""
+    return get_match_prediction_options()
 
 
 @router.get("/{match_id}/wpa")

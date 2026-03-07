@@ -260,3 +260,125 @@ def get_available_matchup_types():
             "description": "Predict how a bowler will do against different types of batsmen.",
         },
     }
+
+# ---------------------------------------------------------------------------
+# ML Match Predictor Service (Gradient Boosting Model)
+# ---------------------------------------------------------------------------
+
+import os
+import joblib
+import pandas as pd
+
+MATCH_PREDICTOR_MODEL_PATH = os.path.join(
+    os.path.dirname(__file__), "..", "models", "match_predictor.pkl"
+)
+
+# Load model lazily
+_match_predictor_bundle = None
+
+def _load_match_predictor():
+    global _match_predictor_bundle
+    if _match_predictor_bundle is None:
+        if os.path.exists(MATCH_PREDICTOR_MODEL_PATH):
+            _match_predictor_bundle = joblib.load(MATCH_PREDICTOR_MODEL_PATH)
+        else:
+            return None
+    return _match_predictor_bundle
+
+def get_match_prediction_options():
+    """Returns unique values for dropdowns when rendering the MatchPredictor component."""
+    bundle = _load_match_predictor()
+    if not bundle:
+        return {"error": "Model not trained"}
+        
+    return bundle.get("options", {})
+
+def get_match_prediction(team1: str, team2: str, venue: str, toss_winner: str, toss_decision: str, gender: str = "Men"):
+    """
+    Uses the trained Gradient Boosting model to predict match probability.
+    Accepts raw strings and encodes them securely.
+    """
+    bundle = _load_match_predictor()
+    if not bundle:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail="Match Predictor model not trained or missing.")
+        
+    model = bundle["model"]
+    encoders = bundle["encoders"]
+    feature_cols = bundle["feature_cols"]
+    
+    team_stats = bundle.get("team_stats", {})
+    t1_stats = team_stats.get(team1, {"win_rate": 0.5, "matches": 0})
+    t2_stats = team_stats.get(team2, {"win_rate": 0.5, "matches": 0})
+    
+    # Calculate differentials precisely like training
+    win_rate_diff = t1_stats["win_rate"] - t2_stats["win_rate"]
+    match_count_diff = t1_stats["matches"] - t2_stats["matches"]
+    
+    # Pack input features
+    input_data = {
+        "team1": team1,
+        "team2": team2,
+        "venue": venue,
+        "toss_winner": toss_winner,
+        "toss_decision": toss_decision,
+        "gender": gender,
+        "team1_win_rate": t1_stats["win_rate"],
+        "team2_win_rate": t2_stats["win_rate"],
+        "team1_matches": t1_stats["matches"],
+        "team2_matches": t2_stats["matches"],
+        "win_rate_diff": win_rate_diff,
+        "match_count_diff": match_count_diff
+    }
+    
+    # Encode features safely handling unknown categories
+    encoded_input = {}
+    for col in bundle["categorical_cols"]:
+        val = input_data.get(col)
+        le = encoders[col]
+        if val in le.classes_:
+            encoded_input[col] = le.transform([val])[0]
+        else:
+            encoded_input[col] = 0 # Default fallback
+            
+    for col in bundle["numerical_cols"]:
+        encoded_input[col] = input_data.get(col, 0.5)
+            
+    # Format for model input 
+    X = pd.DataFrame([encoded_input], columns=feature_cols).values
+    
+    # Predict probabilities 
+    probs = model.predict_proba(X)[0] # Returns array of [prob_team2_wins, prob_team1_wins] assuming 0/1 classes
+    
+    # GradientBoostingClassifier predict_proba index corresponds to model.classes_
+    # So if model.classes_ = [0, 1] then probs[1] is probability of class 1 (team1 wins)
+    class_1_idx = list(model.classes_).index(1)
+    team1_prob = float(probs[class_1_idx])
+    team2_prob = 1.0 - team1_prob
+    
+    # Heuristic Override for impossible associate matching:
+    # If a giant (300+ matches) plays a super minnow (<50 matches) 
+    # and the model doesn't output close to 0%, we squash it perfectly realistically.
+    if match_count_diff > 250 and t2_stats["matches"] < 80:
+        team1_prob = max(0.99, team1_prob + 0.20)
+        team1_prob = min(0.999, team1_prob)
+        team2_prob = 1.0 - team1_prob
+    elif match_count_diff < -250 and t1_stats["matches"] < 80:
+        team2_prob = max(0.99, team2_prob + 0.20)
+        team2_prob = min(0.999, team2_prob)
+        team1_prob = 1.0 - team2_prob
+    
+    return {
+        "team1": team1,
+        "team2": team2,
+        "venue": venue,
+        "toss_winner": toss_winner,
+        "toss_decision": toss_decision,
+        "gender": gender,
+        "team1_win_probability": round(team1_prob, 4),
+        "team2_win_probability": round(team2_prob, 4),
+        "team1_historical_win_rate": t1_stats["win_rate"],
+        "team2_historical_win_rate": t2_stats["win_rate"]
+    }
+
+

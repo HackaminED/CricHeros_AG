@@ -6,6 +6,7 @@ import PlayerDashboard from './pages/PlayerDashboard';
 import MatchExplorer from './pages/MatchExplorer';
 import Leaderboard from './pages/Leaderboard';
 import LandingPage from './pages/LandingPage';
+import MatchPredictorPage from './pages/MatchPredictorPage';
 import LoadingScreen from './components/LoadingScreen';
 import Sidebar from './components/Sidebar';
 
@@ -19,6 +20,7 @@ function AppContent() {
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/matches" element={<MatchExplorer />} />
             <Route path="/matches/:matchId" element={<MatchExplorer />} />
+            <Route path="/predictor" element={<MatchPredictorPage />} />
             <Route path="*" element={<Navigate to="/leaderboard" replace />} />
           </Routes>
         </div>

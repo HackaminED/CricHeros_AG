@@ -398,10 +398,10 @@ export default function PlayerDashboard() {
                   <StatCard label="Avg Bowl Impact" value={career.avg_bowling_impact?.toFixed(3) ?? '0'} colorClass={career.avg_bowling_impact > 0 ? 'text-[var(--accent-strong)]' : 'text-[var(--text-secondary)]'} />
                 </div>
               </div>
-            </motion.section>
-          )}
-        </motion.div>
-      )}
+             </motion.section>
+           )}
+         </motion.div>
+       )}
 
       <ExplainModal
         isOpen={showExplain}

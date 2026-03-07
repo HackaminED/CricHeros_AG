@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000';
+// Automatically distinct between local dev and Vercel Production
+const isProd = import.meta.env.PROD || window.location.hostname !== 'localhost';
+const API_URL = isProd ? '/api' : 'http://localhost:8000';
 
 const api = axios.create({
     baseURL: API_URL,
@@ -70,5 +72,19 @@ export const getPlayerCis = (playerName, lastN = 10, gender = 'Men') =>
 // Stats
 export const getStats = () =>
     api.get('/stats').then(r => r.data);
+
+// Match Predictor API
+export const getMatchPredictionOptions = () =>
+    api.get('/matches/predict/options').then(r => r.data);
+
+export const predictMatch = (team1, team2, venue, tossWinner, tossDecision, gender = 'Men') =>
+    api.post('/matches/predict', {
+        team1,
+        team2,
+        venue,
+        toss_winner: tossWinner,
+        toss_decision: tossDecision,
+        gender
+    }).then(r => r.data);
 
 export default api;

@@ -7,6 +7,7 @@ const navItems = [
   { to: '/player', icon: '👤', label: 'Player Dashboard' },
   { to: '/leaderboard', icon: '🏆', label: 'Leaderboard' },
   { to: '/matches', icon: '🏏', label: 'Match Explorer' },
+  { to: '/predictor', icon: '🔮', label: 'AI Predictor' },
 ];
 
 export default function Sidebar({ open = true, onCollapse }) {
