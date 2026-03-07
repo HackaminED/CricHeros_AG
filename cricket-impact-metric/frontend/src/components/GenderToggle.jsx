@@ -6,10 +6,10 @@ export default function GenderToggle() {
 
   return (
     <div
-      className="flex rounded-[var(--radius-lg)] p-1 gap-0"
+      className="flex rounded-xl p-1 gap-0"
       style={{
         background: 'var(--surface-muted)',
-        boxShadow: 'var(--shadow-soft)',
+        boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.04)',
       }}
       role="group"
       aria-label="Toggle gender: men or women"
@@ -17,9 +17,9 @@ export default function GenderToggle() {
       <button
         type="button"
         onClick={() => toggleGender('Men')}
-        className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-[var(--radius-lg)] text-sm font-bold transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[rgba(0,78,152,0.5)] ${
+        className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-[10px] text-sm font-bold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
           gender === 'Men'
-            ? 'bg-[var(--accent)] text-white shadow-soft'
+            ? 'bg-[var(--accent)] text-white shadow-md'
             : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
         }`}
         aria-pressed={gender === 'Men'}
@@ -30,9 +30,9 @@ export default function GenderToggle() {
       <button
         type="button"
         onClick={() => toggleGender('Women')}
-        className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-[var(--radius-lg)] text-sm font-bold transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[rgba(0,78,152,0.5)] ${
+        className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-[10px] text-sm font-bold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
           gender === 'Women'
-            ? 'bg-[var(--accent-strong)] text-white shadow-soft'
+            ? 'bg-[var(--accent-strong)] text-white shadow-md'
             : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
         }`}
         aria-pressed={gender === 'Women'}

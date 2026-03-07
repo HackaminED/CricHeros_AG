@@ -5,7 +5,7 @@ export default function InningsTable({ innings = [], highPressureThreshold = 1.5
   if (!innings || innings.length === 0) {
     return (
       <div
-        className="rounded-lg p-6 text-center text-(--text-secondary)"
+        className="rounded-2xl p-6 text-center text-[var(--text-secondary)]"
         style={{ background: 'var(--surface-muted)' }}
       >
         No innings data
@@ -15,21 +15,21 @@ export default function InningsTable({ innings = [], highPressureThreshold = 1.5
 
   return (
     <div
-      className="rounded-lg overflow-hidden dark-no-border h-[400px] flex flex-col"
+      className="rounded-2xl overflow-hidden dark-no-border h-[400px] flex flex-col"
       style={{
         background: 'var(--surface-card)',
         boxShadow: 'var(--shadow-soft)',
-        border: '1px solid rgba(58,110,165,0.2)',
+        border: '1px solid var(--glass-border)',
       }}
     >
-      <div className="px-6 py-4 panel-header border-b border-[var(--muted)]/40 shrink-0 shadow-sm z-20">
-        <h3 className="font-display font-semibold text-[var(--text-primary)]" style={{ fontSize: 'var(--text-h3)' }}>
+      <div className="px-6 py-4 dark-no-border shrink-0 z-20" style={{ background: 'var(--surface-muted)' }}>
+        <h3 className="font-display font-bold text-[var(--text-primary)] text-lg">
           Innings Breakdown (Last {innings.length})
         </h3>
       </div>
       
       {/* Header Row */}
-      <div className="flex items-center text-(--text-small) text-(--text-secondary) uppercase tracking-wider border-b border-[var(--muted)]/50 pb-2 pt-3 px-6 bg-[var(--surface-muted)] shrink-0 z-10 shadow-sm">
+      <div className="flex items-center text-xs text-[var(--text-secondary)] uppercase tracking-wider pb-2 pt-3 px-6 bg-[var(--surface-muted)] shrink-0 z-10">
         <div className="flex-1 text-left font-bold min-w-[80px]">Date</div>
         <div className="w-12 text-center font-bold">Runs</div>
         <div className="w-12 text-center font-bold">Balls</div>
@@ -53,14 +53,15 @@ export default function InningsTable({ innings = [], highPressureThreshold = 1.5
             const isHighPressure = (inn.pressure_index || 0) >= highPressureThreshold;
             return (
               <div
-                className={`flex items-center px-2 py-3 mb-2 rounded-lg border border-[var(--muted)]/20 transition-all duration-300 ${
-                  isSelected ? 'ring-2 ring-[var(--accent)] bg-[var(--surface-muted)] scale-[1.01]' : 'bg-[var(--surface-card)] hover:bg-[var(--surface-muted)]'
+                className={`flex items-center px-3 py-3 mb-2 rounded-xl transition-all duration-200 ${
+                  isSelected ? 'ring-2 ring-[var(--accent)] bg-[var(--surface-muted)]' : 'hover:bg-[var(--surface-muted)]'
                 }`}
                 style={{
-                  borderLeft: isHighPressure ? '4px solid var(--accent)' : '4px solid transparent',
+                  border: '1px solid var(--glass-border)',
+                  borderLeft: isHighPressure ? '4px solid var(--accent)' : undefined,
                 }}
               >
-                <div className="flex-1 text-(--text-secondary) text-xs min-w-[80px]">
+                <div className="flex-1 text-[var(--text-secondary)] text-xs min-w-[80px]">
                   {inn.date || '—'}
                 </div>
                 <div className="w-12 text-center tabular-nums font-bold text-[var(--accent)]">{inn.runs}</div>

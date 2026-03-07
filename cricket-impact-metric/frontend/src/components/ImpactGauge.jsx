@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
-const STROKE_WIDTH = 18;
-const RADIUS = 45;
+const STROKE_WIDTH = 14;
+const RADIUS = 48;
 
 export default function ImpactGauge({
   score = 0,
@@ -17,7 +17,7 @@ export default function ImpactGauge({
   const offset = circumference - (animatedScore / 100) * circumference;
 
   useEffect(() => {
-    const duration = 1500;
+    const duration = 1200;
     const start = performance.now();
     const from = 0;
     const to = normalizedScore;
@@ -35,11 +35,11 @@ export default function ImpactGauge({
 
   return (
     <div
-      className="relative flex flex-col items-center justify-center p-6 rounded-[var(--radius-lg)] dark-no-border"
+      className="relative flex flex-col items-center justify-center p-6 rounded-2xl dark-no-border card-hover"
       style={{
         background: 'var(--surface-card)',
         boxShadow: 'var(--shadow-strong)',
-        border: '1px solid rgba(58,110,165,0.2)',
+        border: '1px solid var(--glass-border)',
         minWidth: size,
         minHeight: size,
       }}
@@ -48,11 +48,11 @@ export default function ImpactGauge({
         <button
           type="button"
           onClick={onInfoClick}
-          className="absolute top-3 right-3 w-8 h-8 rounded-[var(--radius-sm)] flex items-center justify-center text-sm font-bold transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgba(0,78,152,0.5)]"
+          className="absolute top-3 right-3 w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
           style={{
             background: 'var(--accent)',
             color: 'white',
-            boxShadow: 'var(--shadow-soft)',
+            boxShadow: '0 4px 12px var(--accent-glow)',
           }}
           title="How is this calculated?"
           aria-label="How is Impact Score calculated?"
@@ -61,9 +61,9 @@ export default function ImpactGauge({
         </button>
       )}
 
-      <h3 className="text-[var(--text-secondary)] font-medium tracking-wide text-xs uppercase mb-4">
+      <p className="text-[var(--text-secondary)] font-semibold tracking-wider text-xs uppercase mb-4">
         {label}
-      </h3>
+      </p>
 
       <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
         <svg
@@ -74,75 +74,47 @@ export default function ImpactGauge({
           aria-hidden
         >
           <defs>
-            <filter id="gauge-inner-shadow" x="-50%" y="-50%" width="200%" height="200%">
-              <feOffset dx="0" dy="2" />
+            <linearGradient id="gauge-fill" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="var(--accent-strong)" />
+              <stop offset="100%" stopColor="var(--accent)" />
+            </linearGradient>
+            <filter id="gauge-glow" x="-20%" y="-20%" width="140%" height="140%">
               <feGaussianBlur stdDeviation="2" result="blur" />
-              <feFlood floodColor="rgba(0,78,152,0.15)" />
-              <feComposite in2="blur" operator="in" />
               <feMerge>
-                <feMergeNode />
+                <feMergeNode in="blur" />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
-            {showOrangeRim && (
-              <filter id="orange-glow">
-                <feGaussianBlur stdDeviation="1" result="blur" />
-                <feFlood floodColor="var(--accent)" floodOpacity="0.4" />
-                <feComposite in2="blur" operator="in" />
-                <feMerge>
-                  <feMergeNode />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            )}
           </defs>
-          {/* Background ring */}
           <circle
             cx={size / 2}
             cy={size / 2}
             r={r}
             fill="none"
-            stroke="var(--muted)"
+            stroke="var(--surface-muted)"
             strokeWidth={STROKE_WIDTH}
-            strokeOpacity={0.4}
           />
-          {/* Progress ring with inner bevel */}
           <circle
             cx={size / 2}
             cy={size / 2}
             r={r}
             fill="none"
-            stroke="var(--accent-strong)"
+            stroke={showOrangeRim ? 'var(--accent)' : 'url(#gauge-fill)'}
             strokeWidth={STROKE_WIDTH}
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={offset}
-            style={{
-              transition: 'stroke-dashoffset 0.1s linear',
-              filter: showOrangeRim ? 'url(#orange-glow)' : 'url(#gauge-inner-shadow)',
-            }}
+            style={{ transition: 'stroke-dashoffset 0.15s ease-out' }}
           />
-          {showOrangeRim && (
-            <circle
-              cx={size / 2}
-              cy={size / 2}
-              r={r - STROKE_WIDTH / 2}
-              fill="none"
-              stroke="var(--accent)"
-              strokeWidth={2}
-              strokeOpacity={0.5}
-              strokeDasharray={circumference}
-              strokeDashoffset={offset}
-              style={{ transition: 'stroke-dashoffset 0.1s linear' }}
-            />
-          )}
         </svg>
-        {/* Center number */}
         <div
           className="absolute inset-0 flex items-center justify-center font-display font-black tabular-nums"
           style={{
-            fontSize: '48px',
-            color: 'var(--accent-strong)',
+            fontSize: '3rem',
+            background: 'linear-gradient(135deg, var(--accent-strong), var(--accent))',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
             lineHeight: 1,
           }}
         >

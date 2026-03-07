@@ -13,7 +13,7 @@ function AppContent() {
   return (
     <>
       <main className="flex-1">
-        <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 md:py-8" style={{ '--grid-gap': '24px' }}>
+        <div className="max-w-[1400px] mx-auto px-5 md:px-8 py-8 md:py-10">
           <Routes>
             <Route path="/player" element={<PlayerDashboard />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
@@ -40,14 +40,14 @@ export default function App() {
           {/* Landing page lives completely outside the dashboard wrapper */}
           <Route path="/" element={<LandingPage />} />
           
-          {/* All dashboard routes wrap the sidebar and topbar */}
+          {/* All dashboard routes: sidebar + main with premium canvas */}
           <Route path="/*" element={
             <div
-              className={`flex min-h-screen transition-opacity duration-500 ${appLoaded ? 'opacity-100' : 'opacity-0 h-screen overflow-hidden'}`}
+              className={`dashboard-canvas flex min-h-screen transition-opacity duration-500 ${appLoaded ? 'opacity-100' : 'opacity-0 h-screen overflow-hidden'}`}
               style={{ background: 'var(--bg)' }}
             >
               <Sidebar open={sidebarOpen} onCollapse={() => setSidebarOpen(!sidebarOpen)} />
-              <div className="flex-1 flex flex-col min-w-0">
+              <div className="flex-1 flex flex-col min-w-0 relative z-10" style={{ marginLeft: '280px' }}>
                 <AppContent />
               </div>
             </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import ImpactGauge from '../components/ImpactGauge';
 import ImpactTrendChart from '../components/ImpactTrendChart';
 import PlayerSearch from '../components/PlayerSearch';
@@ -9,29 +10,50 @@ import CategoryBadge from '../components/CategoryBadge';
 import { getPlayerImpact, getPlayerTrend, getPlayerWpa } from '../api/api';
 import { useGender } from '../context/GenderContext';
 
-const CARD_PADDING = '20px';
-const SECTION_GAP = 32;
+const SECTION_GAP = 40;
 
-function StatCard({ label, value, sub, colorClass = 'text-[var(--accent-strong)]', info }) {
+function StatCard({ label, value, sub, colorClass = 'text-[var(--accent-strong)]', info, className = '' }) {
   return (
-    <div
-      className="rounded-[var(--radius-lg)] relative group dark-no-border"
-      style={{ padding: CARD_PADDING, background: 'var(--surface-card)', boxShadow: 'var(--shadow-soft)' }}
+    <motion.div
+      layout
+      className={`rounded-2xl relative group dark-no-border card-hover ${className}`}
+      style={{
+        padding: '1.25rem 1.5rem',
+        background: 'var(--surface-card)',
+        boxShadow: 'var(--shadow-soft)',
+        border: '1px solid var(--glass-border)',
+      }}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
     >
-      <p className="text-[var(--text-small)] text-[var(--text-secondary)] uppercase tracking-wider mb-1">{label}</p>
+      <p className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1">{label}</p>
       <p className={`text-2xl font-display font-bold tabular-nums ${colorClass}`}>{value ?? '—'}</p>
-      {sub && <p className="text-[var(--text-small)] text-[var(--text-secondary)] mt-1">{sub}</p>}
+      {sub && <p className="text-xs text-[var(--text-secondary)] mt-1.5">{sub}</p>}
       {info && (
         <span
-          className="absolute top-2 right-2 text-[var(--text-secondary)] text-xs cursor-help opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute top-3 right-3 text-[var(--text-secondary)] text-xs cursor-help opacity-60 hover:opacity-100 transition-opacity"
           title={info}
         >
           ℹ
         </span>
       )}
-    </div>
+    </motion.div>
   );
 }
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.06, delayChildren: 0.1 },
+  },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0 },
+};
 
 export default function PlayerDashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -90,24 +112,26 @@ export default function PlayerDashboard() {
   const career = playerData?.career;
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div className="animate-page-enter">
+      <motion.header
+        className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-10"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
         <div>
-          <h1
-            className="font-display font-bold text-[var(--text-primary)]"
-            style={{ fontSize: 'var(--text-h1)', lineHeight: 'var(--text-h1-lh)' }}
-          >
+          <h1 className="font-display font-bold text-[var(--text-primary)] text-3xl md:text-4xl tracking-tight">
             Player Dashboard
           </h1>
-          <p className="text-[var(--text-secondary)] mt-1">Search and analyze player impact metrics</p>
+          <p className="text-[var(--text-secondary)] mt-1.5 text-base">Search and analyze player impact metrics</p>
         </div>
         <PlayerSearch onSelect={handleSelect} />
-      </header>
+      </motion.header>
 
       {loading && (
-        <div className="flex justify-center py-20" role="status" aria-live="polite">
+        <div className="flex justify-center py-24" role="status" aria-live="polite">
           <div
-            className="w-10 h-10 border-2 border-[var(--accent-strong)] border-t-transparent rounded-full animate-spin"
+            className="w-12 h-12 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin"
             aria-hidden
           />
           <span className="sr-only">Loading player</span>
@@ -115,35 +139,54 @@ export default function PlayerDashboard() {
       )}
 
       {error && (
-        <div
-          className="rounded-[var(--radius-lg)] p-6 border-2 text-center"
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="rounded-2xl p-8 text-center border-2 dark-no-border"
           style={{ borderColor: 'var(--accent)', background: 'var(--surface-muted)' }}
         >
-          <p className="text-[var(--text-primary)]">{error}</p>
-        </div>
+          <p className="text-[var(--text-primary)] font-medium">{error}</p>
+        </motion.div>
       )}
 
       {!playerName && !loading && (
-        <div
-          className="rounded-[var(--radius-lg)] p-16 text-center"
-          style={{ background: 'var(--surface-card)', boxShadow: 'var(--shadow-soft)' }}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
+          className="rounded-2xl p-16 text-center dark-no-border card-hover"
+          style={{ background: 'var(--surface-card)', boxShadow: 'var(--shadow-strong)', border: '1px solid var(--glass-border)' }}
         >
-          <div className="text-6xl mb-4" aria-hidden>🏏</div>
-          <h2 className="font-display font-semibold text-[var(--text-primary)] mb-2" style={{ fontSize: 'var(--text-h2)' }}>
+          <div className="text-7xl mb-6" aria-hidden>🏏</div>
+          <h2 className="font-display font-bold text-[var(--text-primary)] text-2xl mb-3">
             Search for a Player
           </h2>
-          <p className="text-[var(--text-secondary)]">Use the search bar above to find a player and view their impact analysis</p>
-        </div>
+          <p className="text-[var(--text-secondary)] max-w-md mx-auto">
+            Use the search bar above to find a player and view their impact analysis
+          </p>
+        </motion.div>
       )}
 
       {playerData && !loading && (
-        <>
-          {/* 1. Player Info + Impact Score */}
-          <div
-            className="rounded-[var(--radius-lg)] relative overflow-hidden dark-no-border"
-            style={{ padding: CARD_PADDING, background: 'var(--surface-card)', boxShadow: 'var(--shadow-strong)', marginBottom: SECTION_GAP }}
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="space-y-10"
+        >
+          {/* Hero: Player + Gauge */}
+          <motion.section
+            variants={item}
+            className="rounded-2xl relative overflow-hidden dark-no-border"
+            style={{
+              padding: '2rem 2.5rem',
+              background: 'var(--surface-card)',
+              boxShadow: 'var(--shadow-strong)',
+              border: '1px solid var(--glass-border)',
+            }}
           >
-            <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
+            <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-20 pointer-events-none" style={{ background: 'var(--accent-glow)', filter: 'blur(60px)' }} />
+            <div className="flex flex-col md:flex-row items-center gap-10 relative z-10">
               <ImpactGauge
                 score={playerData.impact_score || 0}
                 size={200}
@@ -151,54 +194,49 @@ export default function PlayerDashboard() {
                 showNeonRim={playerData.impact_score >= 80}
               />
               <div className="flex-1 text-center md:text-left">
-                <h2
-                  className="font-display font-bold text-[var(--text-primary)] mb-1 flex items-center justify-center md:justify-start gap-3"
-                  style={{ fontSize: 'var(--text-h2)' }}
-                >
+                <h2 className="font-display font-bold text-[var(--text-primary)] text-2xl md:text-3xl mb-1 flex items-center justify-center md:justify-start gap-2">
                   {playerData.player}
-                  <span className="opacity-80 text-[var(--accent-strong)]" aria-hidden>
+                  <span className="opacity-70 text-[var(--accent-strong)]" aria-hidden>
                     {gender === 'Women' ? '♀' : '♂'}
                   </span>
                 </h2>
-                <p className="text-[var(--text-secondary)] font-medium mb-1 flex items-center justify-center md:justify-start gap-2">
+                <p className="text-[var(--text-secondary)] font-medium flex items-center justify-center md:justify-start gap-2">
                   {playerData.team}
                   <span
-                    className="text-xs px-3 py-1 rounded-[var(--radius-pill)] uppercase tracking-wider font-semibold"
+                    className="text-xs px-3 py-1.5 rounded-xl font-semibold"
                     style={{ background: 'var(--surface-muted)', color: 'var(--text-primary)' }}
                   >
                     {gender}
                   </span>
                 </p>
                 {playerData.category && (
-                  <span className="inline-block mt-2">
+                  <span className="inline-block mt-3">
                     <CategoryBadge category={playerData.category} />
                   </span>
                 )}
               </div>
             </div>
-          </div>
+          </motion.section>
 
-          {/* Last N slider - shared for all sections */}
-          <div className="flex items-center justify-end gap-3" style={{ marginBottom: SECTION_GAP }}>
-            <span className="text-[var(--text-small)] text-[var(--text-secondary)]">Last N games:</span>
+          {/* Last N */}
+          <motion.div variants={item} className="flex items-center justify-end gap-3">
+            <span className="text-sm text-[var(--text-secondary)] font-medium">Last N games</span>
             <input
               type="range"
               min={1}
               max={10}
               value={lastN}
               onChange={(e) => setLastN(Number(e.target.value))}
-              className="w-28 accent-[var(--accent-strong)]"
+              className="w-32 h-2 rounded-full accent-[var(--accent)]"
               id="last-n-slider"
               aria-label="Number of last games"
             />
-            <span className="text-sm font-mono font-bold w-6 text-center text-[var(--accent-strong)] tabular-nums">{lastN}</span>
-          </div>
+            <span className="text-sm font-display font-bold w-8 text-center text-[var(--accent-strong)] tabular-nums">{lastN}</span>
+          </motion.div>
 
-          {/* 2. Performance Metrics */}
-          <section style={{ marginBottom: SECTION_GAP }}>
-            <h3 className="font-display font-semibold text-[var(--text-primary)] mb-4" style={{ fontSize: 'var(--text-h3)' }}>
-              Performance Metrics
-            </h3>
+          {/* Performance — Bento grid */}
+          <motion.section variants={item}>
+            <h3 className="font-display font-bold text-[var(--text-primary)] text-xl mb-4">Performance Metrics</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               <StatCard label="Runs" value={stats?.runs} colorClass="text-[var(--accent)]" />
               <StatCard label="Strike Rate" value={stats?.strike_rate} colorClass="text-[var(--accent-strong)]" />
@@ -207,97 +245,94 @@ export default function PlayerDashboard() {
               <StatCard label="Wickets" value={stats?.wickets} colorClass="text-[var(--text-primary)]" />
               <StatCard label="Economy" value={stats?.economy} colorClass="text-[var(--accent)]" />
             </div>
-          </section>
+          </motion.section>
 
-          {/* 3. Match Context */}
-          <section style={{ marginBottom: SECTION_GAP }}>
-            <h3 className="font-display font-semibold text-[var(--text-primary)] mb-4" style={{ fontSize: 'var(--text-h3)' }}>
-              Match Context
-            </h3>
+          {/* Match Context */}
+          <motion.section variants={item}>
+            <h3 className="font-display font-bold text-[var(--text-primary)] text-xl mb-4">Match Context</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <StatCard
                 label="Average Context Weight"
                 value={playerData.context_weight_avg != null ? `${playerData.context_weight_avg}×` : '—'}
-                sub="1.0 = normal situations; >1.0 = tougher match conditions"
-                info="How difficult the situations were when the player batted or bowled. 1.0 = normal situations, >1.0 = tougher match conditions."
+                sub="1.0 = normal; >1.0 = tougher"
+                info="How difficult the situations were when the player batted or bowled."
               />
               <StatCard
                 label="Average Pressure Index"
                 value={playerData.pressure_index_avg != null ? `${playerData.pressure_index_avg}×` : '—'}
-                sub="Higher values = more critical moments"
-                info="Measures match pressure during player events. Higher values indicate more critical moments."
+                sub="Higher = more critical moments"
+                info="Measures match pressure during player events."
               />
             </div>
-          </section>
+          </motion.section>
 
-          {/* 4. Impact Metrics (Clutch, Weighted Impact) */}
-          <section style={{ marginBottom: SECTION_GAP }}>
-            <h3 className="font-display font-semibold text-[var(--text-primary)] mb-4" style={{ fontSize: 'var(--text-h3)' }}>
-              Impact Metrics
-            </h3>
+          {/* Impact Metrics */}
+          <motion.section variants={item}>
+            <h3 className="font-display font-bold text-[var(--text-primary)] text-xl mb-4">Impact Metrics</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {wpaData && (
                 <div
-                  className="rounded-[var(--radius-lg)] relative group dark-no-border"
-                  style={{ padding: CARD_PADDING, background: 'var(--surface-card)', boxShadow: 'var(--shadow-soft)' }}
+                  className="rounded-2xl p-5 dark-no-border card-hover"
+                  style={{ background: 'var(--surface-card)', boxShadow: 'var(--shadow-soft)', border: '1px solid var(--glass-border)' }}
                 >
-                  <p className="text-[var(--text-small)] text-[var(--text-secondary)] uppercase tracking-wider mb-1 flex items-center gap-1">
-                    Clutch <span className="cursor-help text-[var(--text-secondary)]" title="Clutch: total win probability swing (percent points) the player added per match.">ℹ</span>
+                  <p className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1 flex items-center gap-1">
+                    Clutch <span className="cursor-help" title="Total win probability swing per match.">ℹ</span>
                   </p>
                   <p className={`text-3xl font-display font-bold tabular-nums ${(wpaData.clutch_impact_percent || 0) >= 0 ? 'text-[var(--accent-strong)]' : 'text-[var(--accent)]'}`}>
                     {(wpaData.clutch_impact_percent >= 0 ? '+' : '')}{wpaData.clutch_impact_percent}%
                   </p>
-                  <p className="text-[var(--text-small)] text-[var(--text-secondary)] mt-1">Avg swing per match</p>
+                  <p className="text-xs text-[var(--text-secondary)] mt-1">Avg swing per match</p>
                 </div>
               )}
               <StatCard
                 label="Weighted Impact"
                 value={playerData.impact_weighted != null ? playerData.impact_weighted : '—'}
-                sub="Context-weighted impact"
-                info="Impact score adjusted for match context (difficulty of situations)."
+                sub="Context-weighted"
+                info="Impact score adjusted for match context."
               />
             </div>
-          </section>
+          </motion.section>
 
-          {/* 5. Recent Match Trend */}
-          <section style={{ marginBottom: SECTION_GAP }}>
-            <h3 className="font-display font-semibold text-[var(--text-primary)] mb-4" style={{ fontSize: 'var(--text-h3)' }}>
-              Recent Match Trend
-            </h3>
-            <div className="rounded-[var(--radius-lg)] dark-no-border" style={{ padding: CARD_PADDING, background: 'var(--surface-card)', boxShadow: 'var(--shadow-soft)' }}>
+          {/* Recent Match Trend */}
+          <motion.section variants={item}>
+            <h3 className="font-display font-bold text-[var(--text-primary)] text-xl mb-4">Recent Match Trend</h3>
+            <div
+              className="rounded-2xl dark-no-border overflow-hidden"
+              style={{ padding: '1.5rem', background: 'var(--surface-card)', boxShadow: 'var(--shadow-soft)', border: '1px solid var(--glass-border)' }}
+            >
               {trend3Layer.length > 0 ? (
                 <ImpactTrendChart data={trend3Layer} height={380} use3Layer />
               ) : (
                 <ImpactTrendChart data={trendData} height={380} />
               )}
             </div>
-          </section>
+          </motion.section>
 
-          {/* Innings table */}
           {playerData.last_n_innings && playerData.last_n_innings.length > 0 && (
-            <InningsTable innings={playerData.last_n_innings} highPressureThreshold={1.5} />
+            <motion.div variants={item}>
+              <InningsTable innings={playerData.last_n_innings} highPressureThreshold={1.5} />
+            </motion.div>
           )}
 
-          {/* Career */}
           {career && (
-            <div
-              className="rounded-[var(--radius-lg)] dark-no-border"
-              style={{ padding: CARD_PADDING, background: 'var(--surface-card)', boxShadow: 'var(--shadow-soft)' }}
-            >
-              <h3 className="font-display font-semibold text-[var(--text-primary)] mb-4" style={{ fontSize: 'var(--text-h3)' }}>
-                Career Statistics
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                <StatCard label="Matches" value={career.total_matches ?? 0} />
-                <StatCard label="Total Runs" value={career.total_runs ?? 0} colorClass="text-[var(--accent)]" />
-                <StatCard label="Balls Faced" value={career.total_balls_faced ?? 0} />
-                <StatCard label="Wickets" value={career.total_wickets ?? 0} colorClass="text-[var(--surface)]" />
-                <StatCard label="Avg Bat Impact" value={career.avg_batting_impact?.toFixed(3) ?? '0'} colorClass={career.avg_batting_impact > 0 ? 'text-[var(--accent-strong)]' : 'text-[var(--accent)]'} />
-                <StatCard label="Avg Bowl Impact" value={career.avg_bowling_impact?.toFixed(3) ?? '0'} colorClass={career.avg_bowling_impact > 0 ? 'text-[var(--accent-strong)]' : 'text-[var(--text-secondary)]'} />
+            <motion.section variants={item}>
+              <h3 className="font-display font-bold text-[var(--text-primary)] text-xl mb-4">Career Statistics</h3>
+              <div
+                className="rounded-2xl p-6 dark-no-border"
+                style={{ background: 'var(--surface-card)', boxShadow: 'var(--shadow-soft)', border: '1px solid var(--glass-border)' }}
+              >
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                  <StatCard label="Matches" value={career.total_matches ?? 0} />
+                  <StatCard label="Total Runs" value={career.total_runs ?? 0} colorClass="text-[var(--accent)]" />
+                  <StatCard label="Balls Faced" value={career.total_balls_faced ?? 0} />
+                  <StatCard label="Wickets" value={career.total_wickets ?? 0} colorClass="text-[var(--text-primary)]" />
+                  <StatCard label="Avg Bat Impact" value={career.avg_batting_impact?.toFixed(3) ?? '0'} colorClass={career.avg_batting_impact > 0 ? 'text-[var(--accent-strong)]' : 'text-[var(--accent)]'} />
+                  <StatCard label="Avg Bowl Impact" value={career.avg_bowling_impact?.toFixed(3) ?? '0'} colorClass={career.avg_bowling_impact > 0 ? 'text-[var(--accent-strong)]' : 'text-[var(--text-secondary)]'} />
+                </div>
               </div>
-            </div>
+            </motion.section>
           )}
-        </>
+        </motion.div>
       )}
 
       <ExplainModal
